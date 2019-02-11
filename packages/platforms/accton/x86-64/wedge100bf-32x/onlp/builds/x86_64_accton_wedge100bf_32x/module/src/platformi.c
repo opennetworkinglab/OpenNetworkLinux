@@ -16,11 +16,11 @@ onlp_platformi_sw_init(void)
 int
 onlp_platformi_manage_fans(void)
 {
-    return ONLP_STATUS_E_UNSUPPORTED;
+    return ONLP_STATUS_OK;
 }
 
 int
 onlp_platformi_manage_leds(void)
 {
-    return ONLP_STATUS_E_UNSUPPORTED;
+    return ONLP_STATUS_OK;
 }
