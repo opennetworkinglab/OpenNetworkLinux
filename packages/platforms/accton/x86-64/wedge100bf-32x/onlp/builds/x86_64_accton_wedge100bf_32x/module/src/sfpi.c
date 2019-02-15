@@ -29,6 +29,34 @@
 #include "platform_lib.h"
 
 #include "x86_64_accton_wedge100bf_32x_log.h"
+
+#define BIT(i)          (1 << (i))
+#define NUM_OF_SFP_PORT 32
+static const int sfp_bus_index[] = {
+    3,  2,  5,  4,  7,  6,  9, 8,
+    11,  10, 13, 12, 15, 14, 17, 16,
+    19, 18, 21, 20, 23, 22, 25, 24,
+    27, 26, 29, 28, 31, 30, 33, 32
+};
+
+static uint8_t
+onlp_sfpi_reg_val_to_port_sequence(uint8_t value, int revert)
+{
+    int i;
+    uint8_t ret = 0;
+
+    for (i = 0; i < 8; i++) {
+        if (i % 2) {
+            ret |= (value & BIT(i)) >> 1;
+        }
+        else {
+            ret |= (value & BIT(i)) << 1;
+        }
+    }
+
+    return revert ? ~ret : ret;
+}
+
 /**
  * @brief Software initialization of the SFP module.
  */
@@ -60,6 +88,16 @@ int onlp_sfpi_sw_denit(void) {
  * @param[out] bmap Receives the bitmap.
  */
 int onlp_sfpi_bitmap_get(onlp_sfp_bitmap_t* bmap) {
+    /*
+     * Ports {0, 32}
+     */
+    int p;
+    AIM_BITMAP_CLR_ALL(bmap);
+
+    for(p = 0; p < NUM_OF_SFP_PORT; p++) {
+        AIM_BITMAP_SET(bmap, p);
+    }
+
     return ONLP_STATUS_OK;
 }
 
@@ -79,8 +117,26 @@ int onlp_sfpi_type_get(onlp_oid_id_t id, onlp_sfp_type_t* rtype) {
  * @returns 0 if absent
  * @returns An error condition.
  */
-int onlp_sfpi_is_present(onlp_oid_id_t id) {
-    return ONLP_STATUS_OK;
+int onlp_sfpi_is_present(onlp_oid_id_t port) {
+    int present;
+    int bus = (port < 16) ? 36 : 37;
+    int addr = (port < 16) ? 0x22 : 0x23; /* pca9535 slave address */
+    int offset;
+
+    if (port < 8 || (port >= 16 && port <= 23)) {
+        offset = 0;
+    }
+    else {
+        offset = 1;
+    }
+
+    present = onlp_i2c_readb(bus, addr, offset, ONLP_I2C_F_FORCE);
+    if (present < 0) {
+        return ONLP_STATUS_E_INTERNAL;
+    }
+
+    present = onlp_sfpi_reg_val_to_port_sequence(present, 0);
+    return !(present & BIT(port % 8));
 }
 
 /**
@@ -88,6 +144,36 @@ int onlp_sfpi_is_present(onlp_oid_id_t id) {
  * @param[out] dst Receives the presence bitmap.
  */
 int onlp_sfpi_presence_bitmap_get(onlp_sfp_bitmap_t* dst) {
+    int i;
+    uint8_t bytes[4] = {0};
+
+    for (i = 0; i < AIM_ARRAYSIZE(bytes); i++) {
+        int bus = (i < 2) ? 36 : 37;
+        int addr = (i < 2) ? 0x22 : 0x23; /* pca9535 slave address */
+        int offset = (i % 2);
+
+        bytes[i] = onlp_i2c_readb(bus, addr, offset, ONLP_I2C_F_FORCE);
+        if (bytes[i] < 0) {
+            return ONLP_STATUS_E_INTERNAL;
+        }
+
+        bytes[i] = onlp_sfpi_reg_val_to_port_sequence(bytes[i], 1);
+    }
+
+    /* Convert to 32 bit integer in port order */
+    i = 0;
+    uint32_t presence_all = 0 ;
+    for(i = AIM_ARRAYSIZE(bytes)-1; i >= 0; i--) {
+        presence_all <<= 8;
+        presence_all |= bytes[i];
+    }
+
+    /* Populate bitmap */
+    for(i = 0; presence_all; i++) {
+        AIM_BITMAP_MOD(dst, i, (presence_all & 1));
+        presence_all >>= 1;
+    }
+
     return ONLP_STATUS_OK;
 }
 
@@ -111,6 +197,8 @@ int onlp_sfpi_rx_los_bitmap_get(onlp_sfp_bitmap_t* dst) {
  */
 int onlp_sfpi_dev_read(onlp_oid_id_t id, int devaddr, int addr,
                        uint8_t* dst, int len) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_read(bus, devaddr, addr, len, dst, 0);
     return ONLP_STATUS_OK;
 }
 
@@ -125,6 +213,8 @@ int onlp_sfpi_dev_read(onlp_oid_id_t id, int devaddr, int addr,
  */
 int onlp_sfpi_dev_write(onlp_oid_id_t id, int devaddr, int addr,
                         uint8_t* src, int len) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_write(bus, devaddr, addr, len, src, 0);
     return ONLP_STATUS_OK;
 }
 
@@ -136,7 +226,8 @@ int onlp_sfpi_dev_write(onlp_oid_id_t id, int devaddr, int addr,
  * @returns The byte on success or ONLP_STATUS_E* on error.
  */
 int onlp_sfpi_dev_readb(onlp_oid_id_t id, int devaddr, int addr) {
-    return ONLP_STATUS_OK;
+    int bus = sfp_bus_index[id];
+    return onlp_i2c_readb(bus, devaddr, addr, 0);
 }
 
 /**
@@ -148,6 +239,8 @@ int onlp_sfpi_dev_readb(onlp_oid_id_t id, int devaddr, int addr) {
  */
 int onlp_sfpi_dev_writeb(onlp_oid_id_t id, int devaddr, int addr,
                          uint8_t value) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_writeb(bus, devaddr, addr, value, 0);
     return ONLP_STATUS_OK;
 }
 
@@ -159,7 +252,8 @@ int onlp_sfpi_dev_writeb(onlp_oid_id_t id, int devaddr, int addr,
  * @returns The word if successful, ONLP_STATUS_E* on error.
  */
 int onlp_sfpi_dev_readw(onlp_oid_id_t id, int devaddr, int addr) {
-    return ONLP_STATUS_OK;
+    int bus = sfp_bus_index[id];
+    return onlp_i2c_readw(bus, devaddr, addr, 0);
 }
 
 /**
@@ -171,6 +265,8 @@ int onlp_sfpi_dev_readw(onlp_oid_id_t id, int devaddr, int addr) {
  */
 int onlp_sfpi_dev_writew(onlp_oid_id_t id, int devaddr, int addr,
                          uint16_t value) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_writew(bus, devaddr, addr, value, 0);
     return ONLP_STATUS_OK;
 }
 
@@ -242,5 +338,13 @@ int onlp_sfpi_port_map(onlp_oid_id_t id, int* rport) {
  * @param [out] hdr Receives the header.
  */
 int onlp_sfpi_hdr_get(onlp_oid_id_t id, onlp_oid_hdr_t* hdr) {
+    int is_present = onlp_sfp_is_present(id);
+    *hdr = {
+        ONLP_SFP_ID_CREATE(id),
+        "",
+        ONLP_CHASSIS_ID_CREATE(1),
+        {},
+        is_present ? ONLP_OID_STATUS_FLAG_PRESENT : 0
+    };
     return ONLP_STATUS_OK;
 }
