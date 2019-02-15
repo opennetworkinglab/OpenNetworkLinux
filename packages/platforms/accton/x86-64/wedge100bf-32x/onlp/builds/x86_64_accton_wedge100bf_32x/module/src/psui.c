@@ -97,8 +97,9 @@ int onlp_psui_sw_denit(void) {
  * @param[out] rv Receives the header.
  */
 int onlp_psui_hdr_get(onlp_oid_id_t id, onlp_oid_hdr_t* rv) {
-    int pid = ONLP_OID_ID_GET(id);
-    *rv = pinfo[pid].hdr;
+    onlp_psu_info_t info;
+    onlp_psui_info_get(id, &info);
+    *rv = info.hdr;
     return ONLP_STATUS_OK;
 }
 

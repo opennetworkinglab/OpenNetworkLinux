@@ -95,8 +95,9 @@ int onlp_fani_sw_denit(void) {
  * @param[out] hdr Receives the OID header.
  */
 int onlp_fani_hdr_get(onlp_oid_id_t id, onlp_oid_hdr_t* hdr) {
-    int fid = ONLP_OID_ID_GET(id);
-    *hdr = finfo[fid].hdr;
+    onlp_fan_info_t info;
+    onlp_fani_info_get(id, &info);
+    *hdr = info.hdr;
     return ONLP_STATUS_OK;
 }
 

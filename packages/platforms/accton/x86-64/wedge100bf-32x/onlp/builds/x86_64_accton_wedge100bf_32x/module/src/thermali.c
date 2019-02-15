@@ -116,8 +116,9 @@ int onlp_thermali_sw_denit(void) {
  * @param[out] rv Receives the header.
  */
 int onlp_thermali_hdr_get(onlp_oid_id_t id, onlp_oid_hdr_t* rv) {
-    int tid = ONLP_OID_ID_GET(id);
-    *rv = linfo[tid].hdr;
+    onlp_thermal_info_t info;
+    onlp_thermali_info_get(id, &info);
+    *rv = info.hdr;
     return ONLP_STATUS_OK;
 }
 
