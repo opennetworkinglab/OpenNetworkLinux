@@ -107,6 +107,7 @@ int onlp_sfpi_bitmap_get(onlp_sfp_bitmap_t* bmap) {
  * @param[out] rtype Receives the connector type.
  */
 int onlp_sfpi_type_get(onlp_oid_id_t id, onlp_sfp_type_t* rtype) {
+    *rtype = ONLP_SFP_TYPE_QSFP28;
     return ONLP_STATUS_OK;
 }
 
@@ -283,6 +284,19 @@ int onlp_sfpi_post_insert(onlp_oid_id_t id, sff_info_t* info) {
 }
 
 /**
+ * @brief Get the SFP's OID header.
+ * @param id The SFP oid.
+ * @param [out] hdr Receives the header.
+ */
+int onlp_sfpi_hdr_get(onlp_oid_id_t id, onlp_oid_hdr_t* hdr) {
+    int is_present = onlp_sfp_is_present(id);
+    hdr->id = ONLP_SFP_ID_CREATE(id);
+    hdr->poid = 0;
+    hdr->status = is_present ? ONLP_OID_STATUS_FLAG_PRESENT : 0;
+    return ONLP_STATUS_OK;
+}
+
+/**
  * @brief Returns whether or not the given control is supported on the given port.
  * @param id The SFP Port ID.
  * @param control The control.
@@ -293,58 +307,6 @@ int onlp_sfpi_post_insert(onlp_oid_id_t id, sff_info_t* info) {
  */
 int onlp_sfpi_control_supported(onlp_oid_id_t id,
                                 onlp_sfp_control_t control, int* rv) {
-    return ONLP_STATUS_OK;
-}
-
-/**
- * @brief Set an SFP control.
- * @param id The SFP Port ID.
- * @param control The control.
- * @param value The value.
- */
-int onlp_sfpi_control_set(onlp_oid_id_t id, onlp_sfp_control_t control,
-                          int value) {
-    return ONLP_STATUS_OK;
-}
-
-/**
- * @brief Get an SFP control.
- * @param id The SFP Port ID.
- * @param control The control
- * @param[out] value Receives the current value.
- */
-int onlp_sfpi_control_get(onlp_oid_id_t id, onlp_sfp_control_t control,
-                          int* value) {
-    return ONLP_STATUS_OK;
-}
-
-/**
- * @brief Remap SFP user SFP port numbers before calling the SFPI interface.
- * @param id The SFP Port ID.
- * @param[out] rport Receives the new port.
- * @note This function will be called to remap the user SFP port number
- * to the number returned in rport before the SFPI functions are called.
- * This is an optional convenience for platforms with dynamic or
- * variant physical SFP numbering.
- */
-int onlp_sfpi_port_map(onlp_oid_id_t id, int* rport) {
-    return ONLP_STATUS_OK;
-}
-
-
-/**
- * @brief Get the SFP's OID header.
- * @param id The SFP oid.
- * @param [out] hdr Receives the header.
- */
-int onlp_sfpi_hdr_get(onlp_oid_id_t id, onlp_oid_hdr_t* hdr) {
-    int is_present = onlp_sfp_is_present(id);
-    *hdr = {
-        ONLP_SFP_ID_CREATE(id),
-        "",
-        ONLP_CHASSIS_ID_CREATE(1),
-        {},
-        is_present ? ONLP_OID_STATUS_FLAG_PRESENT : 0
-    };
+    *rv = 0;
     return ONLP_STATUS_OK;
 }
