@@ -135,10 +135,12 @@ int onlp_thermali_info_get(onlp_oid_id_t id, onlp_thermal_info_t* info) {
 
     /* Set the onlp_oid_hdr_t and capabilities */
     *info = linfo[tid];
+    int multiplier = 1;
 
     /* get path */
     if (THERMAL_CPU_CORE == tid) {
         sprintf(path, THERMAL_CPU_CORE_PATH_FORMAT, directory[tid]);
+        multiplier = 1000;
     }else {
         sprintf(path, THERMAL_PATH_FORMAT, directory[tid]);
     }
@@ -147,6 +149,7 @@ int onlp_thermali_info_get(onlp_oid_id_t id, onlp_thermal_info_t* info) {
             AIM_LOG_ERROR("Unable to read status from file (%s)\r\n", path);
         return ONLP_STATUS_E_INTERNAL;
     }
+    info->mcelsius = info->mcelsius * multiplier;
     info->hdr.status |= ONLP_OID_STATUS_FLAG_PRESENT;
     return ONLP_STATUS_OK;
 }
