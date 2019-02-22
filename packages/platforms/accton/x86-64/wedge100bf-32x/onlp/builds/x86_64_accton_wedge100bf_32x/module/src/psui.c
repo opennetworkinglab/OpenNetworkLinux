@@ -23,6 +23,7 @@
  *
  *
  ***********************************************************/
+#include <unistd.h>
 #include <onlplib/i2c.h>
 #include <onlplib/file.h>
 #include <onlp/platformi/psui.h>
