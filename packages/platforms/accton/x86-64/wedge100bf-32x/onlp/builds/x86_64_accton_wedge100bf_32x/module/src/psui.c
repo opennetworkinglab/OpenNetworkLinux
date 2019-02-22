@@ -143,6 +143,7 @@ int onlp_psui_info_get(onlp_oid_id_t id, onlp_psu_info_t* info) {
     if (bmc_i2c_writeb(7, 0x70, 0, value) < 0) {
         return ONLP_STATUS_E_INTERNAL;
     }
+    usleep(1200);
 
     /* Read vin */
     addr  = (pid == PSU1_ID) ? 0x59 : 0x5a;
@@ -186,6 +187,9 @@ int onlp_psui_info_get(onlp_oid_id_t id, onlp_psu_info_t* info) {
     }
 
     /* Get model name */
-    return bmc_i2c_readraw(7, addr, 0x9a, info->model, sizeof(info->model));
+    bmc_i2c_readraw(7, addr, 0x9a, info->model, sizeof(info->model));
+
+    /* Get Serial number */
+    return bmc_i2c_readraw(7, addr, 0x9e, info->serial, sizeof(info->serial));
 }
 
