@@ -20,5 +20,6 @@ class OnlPlatform_x86_64_accton_wedge100bf_32x_r0(OnlPlatformAccton,
                 ('24c64', 0x50, 40),
                 ])
         subprocess.call('ifconfig usb0 up', shell=True)
+        subprocess.call('ifconfig usb0 192.168.0.2/24', shell=True)
 
         return True
