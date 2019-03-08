@@ -118,8 +118,7 @@ onlp_sfpi_reg_val_to_port_sequence(uint8_t value, int revert)
     return revert ? ~ret : ret;
 }
 
-int
-int onlp_sfpi_is_present(onlp_oid_id_t id)
+int onlp_sfpi_is_present(onlp_oid_id_t port)
 {
     /*
      * Return 1 if present.
