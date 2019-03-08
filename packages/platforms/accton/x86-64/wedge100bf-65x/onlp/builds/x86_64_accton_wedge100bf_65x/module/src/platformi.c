@@ -4,7 +4,7 @@
 const char*
 onlp_platformi_get(void)
 {
-    return "x86-64-accton-wedge100bf-32x-r0";
+    return "x86-64-accton-wedge100bf-65x-r0";
 }
 
 int
