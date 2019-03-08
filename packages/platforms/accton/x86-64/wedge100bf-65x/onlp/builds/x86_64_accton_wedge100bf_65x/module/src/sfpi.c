@@ -119,7 +119,7 @@ onlp_sfpi_reg_val_to_port_sequence(uint8_t value, int revert)
 }
 
 int
-onlp_sfpi_is_present(int port)
+int onlp_sfpi_is_present(onlp_oid_id_t id)
 {
     /*
      * Return 1 if present.
@@ -384,18 +384,6 @@ int
 onlp_sfpi_dom_read(int port, uint8_t data[256])
 {
     return sfpi_eeprom_read(port, 0x51, data);
-}
-
-int
-onlp_sfpi_control_set(int port, onlp_sfp_control_t control, int value)
-{
-    return ONLP_STATUS_E_UNSUPPORTED;
-}
-
-int
-onlp_sfpi_control_get(int port, onlp_sfp_control_t control, int* value)
-{
-    return ONLP_STATUS_E_UNSUPPORTED;
 }
 
 int
