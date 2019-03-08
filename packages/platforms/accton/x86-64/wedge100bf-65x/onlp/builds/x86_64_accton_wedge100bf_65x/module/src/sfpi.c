@@ -48,10 +48,29 @@ static const int sfp_bus_index[] = {
  * SFPI Entry Points
  *
  ***********************************************************/
-int
-onlp_sfpi_init(void)
-{
-    /* Called at initialization time */    
+
+/**
+ * @brief Software initialization of the SFP module.
+ */
+int onlp_sfpi_sw_init(void) {
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Hardware initialization of the SFP module.
+ * @param flags The hardware initialization flags.
+ */
+int onlp_sfpi_hw_init(uint32_t flags) {
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Deinitialize the chassis software module.
+ * @note The primary purpose of this API is to properly
+ * deallocate any resources used by the module in order
+ * faciliate detection of real resouce leaks.
+ */
+int onlp_sfpi_sw_denit(void) {
     return ONLP_STATUS_OK;
 }
 
@@ -59,7 +78,7 @@ int
 onlp_sfpi_bitmap_get(onlp_sfp_bitmap_t* bmap)
 {
     /*
-     * Ports {0, 32}
+     * Ports {0, 64}
      */
     int p;
     AIM_BITMAP_CLR_ALL(bmap);
@@ -68,6 +87,16 @@ onlp_sfpi_bitmap_get(onlp_sfp_bitmap_t* bmap)
         AIM_BITMAP_SET(bmap, p);
     }
 
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Determine the SFP connector type.
+ * @param id The SFP Port ID.
+ * @param[out] rtype Receives the connector type.
+ */
+int onlp_sfpi_type_get(onlp_oid_id_t id, onlp_sfp_type_t* rtype) {
+    *rtype = ONLP_SFP_TYPE_QSFP28;
     return ONLP_STATUS_OK;
 }
 
@@ -190,6 +219,130 @@ onlp_sfpi_presence_bitmap_get(onlp_sfp_bitmap_t* dst)
 int
 onlp_sfpi_rx_los_bitmap_get(onlp_sfp_bitmap_t* dst)
 {
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Read bytes from the target device on the given SFP port.
+ * @param id The SFP Port ID.
+ * @param devaddr The device address.
+ * @param addr Read offset.
+ * @param[out] dst Receives the data.
+ * @param len Read length.
+ * @returns The number of bytes read or ONLP_STATUS_E_* no error.
+ */
+int onlp_sfpi_dev_read(onlp_oid_id_t id, int devaddr, int addr,
+                       uint8_t* dst, int len) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_read(bus, devaddr, addr, len, dst, 0);
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Write bytes to the target device on the given SFP port.
+ * @param id The SFP Port ID.
+ * @param devaddr The device address.
+ * @param addr Write offset.
+ * @param src The bytes to write.
+ * @param len Write length.
+ */
+int onlp_sfpi_dev_write(onlp_oid_id_t id, int devaddr, int addr,
+                        uint8_t* src, int len) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_write(bus, devaddr, addr, len, src, 0);
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Read a byte from the target device on the given SFP port.
+ * @param id The SFP Port ID.
+ * @param devaddr The device address.
+ * @param addr The read address.
+ * @returns The byte on success or ONLP_STATUS_E* on error.
+ */
+int onlp_sfpi_dev_readb(onlp_oid_id_t id, int devaddr, int addr) {
+    int bus = sfp_bus_index[id];
+    return onlp_i2c_readb(bus, devaddr, addr, 0);
+}
+
+/**
+ * @brief Write a byte to the target device on the given SFP port.
+ * @param id The SFP Port ID.
+ * @param devaddr The device address.
+ * @param addr The write address.
+ * @param value The write value.
+ */
+int onlp_sfpi_dev_writeb(onlp_oid_id_t id, int devaddr, int addr,
+                         uint8_t value) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_writeb(bus, devaddr, addr, value, 0);
+    return ONLP_STATUS_OK;
+}
+
+
+/**
+ * @brief Read a word from the target device on the given SFP port.
+ * @param id The SFP Port ID.
+ * @param devaddr The device address.
+ * @param addr The read address.
+ * @returns The word if successful, ONLP_STATUS_E* on error.
+ */
+int onlp_sfpi_dev_readw(onlp_oid_id_t id, int devaddr, int addr) {
+    int bus = sfp_bus_index[id];
+    return onlp_i2c_readw(bus, devaddr, addr, 0);
+}
+
+/**
+ * @brief Write a word to the target device on the given SFP port.
+ * @param id The SFP Port ID.
+ * @param devaddr The device address.
+ * @param addr The write address.
+ * @param value The write value.
+ */
+int onlp_sfpi_dev_writew(onlp_oid_id_t id, int devaddr, int addr,
+                         uint16_t value) {
+    int bus = sfp_bus_index[id];
+    onlp_i2c_writew(bus, devaddr, addr, value, 0);
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Perform any actions required after an SFP is inserted.
+ * @param id The SFP Port ID.
+ * @param info The SFF Module information structure.
+ * @note This function is optional. If your platform must
+ * adjust equalizer or preemphasis settings internally then
+ * this function should be implemented as the trigger.
+ */
+int onlp_sfpi_post_insert(onlp_oid_id_t id, sff_info_t* info) {
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Get the SFP's OID header.
+ * @param id The SFP oid.
+ * @param [out] hdr Receives the header.
+ */
+int onlp_sfpi_hdr_get(onlp_oid_id_t id, onlp_oid_hdr_t* hdr) {
+    int is_present = onlp_sfp_is_present(id);
+    hdr->id = ONLP_SFP_ID_CREATE(id);
+    hdr->poid = 0;
+    hdr->status = is_present ? ONLP_OID_STATUS_FLAG_PRESENT : 0;
+    return ONLP_STATUS_OK;
+}
+
+/**
+ * @brief Returns whether or not the given control is supported on the given port.
+ * @param id The SFP Port ID.
+ * @param control The control.
+ * @param[out] rv Receives 1 if supported, 0 if not supported.
+ * @note This provided for convenience and is optional.
+ * If you implement this function your control_set and control_get APIs
+ * will not be called on unsupported ports.
+ */
+int onlp_sfpi_control_supported(onlp_oid_id_t id,
+                                onlp_sfp_control_t control, int* rv) {
+    *rv = 0;
     return ONLP_STATUS_OK;
 }
 

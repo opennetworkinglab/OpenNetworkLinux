@@ -44,19 +44,6 @@
 
 #define IDPROM_PATH "/sys/class/i2c-adapter/i2c-41/41-0050/eeprom"
 
-enum onlp_thermal_id
-{
-    THERMAL_RESERVED = 0,
-    THERMAL_CPU_CORE,
-    THERMAL_1_ON_MAIN_BROAD,
-    THERMAL_2_ON_MAIN_BROAD,
-    THERMAL_3_ON_MAIN_BROAD,
-    THERMAL_4_ON_MAIN_BROAD,
-    THERMAL_5_ON_MAIN_BROAD,
-    THERMAL_6_ON_MAIN_BROAD,
-    THERMAL_7_ON_MAIN_BROAD,
-};
-
 int bmc_send_command(char *cmd);
 int bmc_file_read_int(int* value, char *file, int base);
 int bmc_i2c_readb(uint8_t bus, uint8_t devaddr, uint8_t addr);

@@ -23,6 +23,7 @@
  *
  *
  ***********************************************************/
+#if 0
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -112,3 +113,4 @@ onlp_sysi_platform_manage_leds(void)
     return ONLP_STATUS_E_UNSUPPORTED;
 }
 
+#endif

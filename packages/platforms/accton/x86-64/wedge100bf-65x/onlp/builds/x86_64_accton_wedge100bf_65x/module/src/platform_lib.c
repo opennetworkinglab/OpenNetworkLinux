@@ -103,7 +103,7 @@ static int tty_login(void)
         if (strstr(tty_buf, "bmc login:") != NULL)
         {
             snprintf(tty_buf, MAXIMUM_TTY_BUFFER_LENGTH, "root\r");
-            
+
             if (!tty_exec_buf(TTY_BMC_LOGIN_TIMEOUT, "Password:")) {
                 snprintf(tty_buf, MAXIMUM_TTY_BUFFER_LENGTH, "0penBmc\r");
                 if (!tty_exec_buf(TTY_BMC_LOGIN_TIMEOUT, TTY_PROMPT)) {
@@ -121,7 +121,7 @@ static int tty_login(void)
 int bmc_send_command(char *cmd)
 {
     int i, ret = 0;
-    
+
     for (i = 1; i <= TTY_RETRY; i++) {
         if (tty_open() != 0) {
             printf("ERROR: Cannot open TTY device\n");
@@ -133,7 +133,7 @@ int bmc_send_command(char *cmd)
             continue;
         }
 
-            snprintf(tty_buf, MAXIMUM_TTY_BUFFER_LENGTH, "%s", cmd);
+        snprintf(tty_buf, MAXIMUM_TTY_BUFFER_LENGTH, "%s", cmd);
         ret = tty_exec_buf(TTY_I2C_TIMEOUT * i, TTY_PROMPT);
         tty_close();
         if (ret != 0) {
@@ -144,7 +144,7 @@ int bmc_send_command(char *cmd)
         return 0;
     }
 
-    AIM_LOG_ERROR("Unable to send command to bmc(%s)\r\n", cmd);
+        AIM_LOG_ERROR("Unable to send command to bmc(%s)\r\n", cmd);
     return -1;
 }
 
@@ -224,7 +224,7 @@ bmc_i2c_readraw(uint8_t bus, uint8_t devaddr, uint8_t addr, char* data, int data
     snprintf(cmd, sizeof(cmd), "i2craw -w 0x%x -r 0 %d 0x%02x\r\n", addr, bus, devaddr);
 
     if (bmc_send_command(cmd) < 0) {
-        AIM_LOG_ERROR("Unable to send command to bmc(%s)\r\n", cmd);
+            AIM_LOG_ERROR("Unable to send command to bmc(%s)\r\n", cmd);
         return ONLP_STATUS_E_INTERNAL;
     }
 
@@ -246,6 +246,6 @@ bmc_i2c_readraw(uint8_t bus, uint8_t devaddr, uint8_t addr, char* data, int data
     }
 
     data[i] = 0;
-    return 0;    
+    return 0;
 }
 
