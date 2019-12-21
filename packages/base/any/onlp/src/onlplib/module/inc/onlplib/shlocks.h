@@ -33,7 +33,6 @@ typedef struct onlp_shlock_s onlp_shlock_t;
 
 /**
  * @brief Create or retreive a shared memory region.
- * @param key The shared memory key.
  * @param id The shared memory id.
  * @param size The size of the shared memory region (Only applicable for creation).
  * @param rv [out] Receives the shared memory pointer.
@@ -41,15 +40,15 @@ typedef struct onlp_shlock_s onlp_shlock_t;
  * @returns 0 if the shared memory already existing.
  * @returns < 0 on error.
  */
-int onlp_shmem_create(key_t key, int* id, uint32_t size, void** rv);
+int onlp_shmem_create(key_t id, uint32_t size, void** rv);
 
 
 /**
  * @brief Create a shared memory IPC mutex with the given id.
- * @param id The shared memory id.
+ * @param The shared memory id.
  * @param rv Receives the shared mutex.
  */
-int onlp_shlock_create(key_t key, onlp_shlock_t** rv,
+int onlp_shlock_create(key_t id, onlp_shlock_t** rv,
                        const char* name, ...);
 
 /**
