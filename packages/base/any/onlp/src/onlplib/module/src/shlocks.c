@@ -121,6 +121,7 @@ onlp_shlock_init__(onlp_shlock_t* l, int shmid, const char* fmt, va_list vargs)
         aim_strlcpy(l->name, s, sizeof(l->name));
         l->magic = SHLOCK_MAGIC;
         l->shmid = shmid;
+        free(s);
     }
 }
 
