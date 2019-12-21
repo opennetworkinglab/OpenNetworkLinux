@@ -1,21 +1,21 @@
 /************************************************************
  * <bsn.cl v=2014 v=onl>
- * 
- *           Copyright 2015 Big Switch Networks, Inc.          
- * 
+ *
+ *           Copyright 2015 Big Switch Networks, Inc.
+ *
  * Licensed under the Eclipse Public License, Version 1.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- * 
+ *
  *        http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- * 
+ *
  * </bsn.cl>
  ************************************************************
  *
@@ -68,7 +68,7 @@ onlp_shmem_create(key_t key, uint32_t size, void** rvmem)
     }
     *rvmem = NULL;
 
-#define SHARED_MODE_FLAGS 0
+#define SHARED_MODE_FLAGS 0777
 
 
     shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | SHARED_MODE_FLAGS) ;
@@ -120,6 +120,7 @@ onlp_shlock_init__(onlp_shlock_t* l, const char* fmt, va_list vargs)
         char* s = aim_vfstrdup(fmt, vargs);
         aim_strlcpy(l->name, s, sizeof(l->name));
         l->magic = SHLOCK_MAGIC;
+        free(s);
     }
 }
 
@@ -149,7 +150,15 @@ onlp_shlock_create(key_t id, onlp_shlock_t** rvl, const char* fmt, ...)
 int
 onlp_shlock_destroy(onlp_shlock_t* shlock)
 {
-    /* Nothing at the moment. */
+    int shmid = shmget(ONLP_SHLOCK_GLOBAL_KEY, 0, 0);
+    if (shmid == -1) {
+        AIM_LOG_ERROR("Unable to get shmid: %{errno}", errno);
+        return -1;
+    }
+    if(shmctl(shmid, IPC_RMID, NULL) < 0) {
+        AIM_LOG_ERROR("shmctl failed on existing segment: %{errno}", errno);
+        return -1;
+    }
     return 0;
 }
 
@@ -221,6 +230,16 @@ onlp_shlock_global_init(void)
         if(onlp_shlock_create(ONLP_SHLOCK_GLOBAL_KEY, &global_lock__,
                               "onlp-global-lock") < 0) {
             AIM_DIE("Global lock created failed.");
+        }
+    }
+}
+
+void
+onlp_shlock_global_deinit(void)
+{
+    if(global_lock__ != NULL) {
+        if(onlp_shlock_destroy(global_lock__) < 0) {
+            AIM_DIE("Global lock destory failed.");
         }
     }
 }
