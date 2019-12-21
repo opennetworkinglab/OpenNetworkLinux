@@ -1,21 +1,21 @@
 /************************************************************
  * <bsn.cl v=2014 v=onl>
- * 
- *           Copyright 2015 Big Switch Networks, Inc.          
- * 
+ *
+ *           Copyright 2015 Big Switch Networks, Inc.
+ *
  * Licensed under the Eclipse Public License, Version 1.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- * 
+ *
  *        http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- * 
+ *
  * </bsn.cl>
  ************************************************************
  *
@@ -33,6 +33,7 @@ typedef struct onlp_shlock_s onlp_shlock_t;
 
 /**
  * @brief Create or retreive a shared memory region.
+ * @param key The shared memory key.
  * @param id The shared memory id.
  * @param size The size of the shared memory region (Only applicable for creation).
  * @param rv [out] Receives the shared memory pointer.
@@ -40,15 +41,15 @@ typedef struct onlp_shlock_s onlp_shlock_t;
  * @returns 0 if the shared memory already existing.
  * @returns < 0 on error.
  */
-int onlp_shmem_create(key_t id, uint32_t size, void** rv);
+int onlp_shmem_create(key_t key, int* id, uint32_t size, void** rv);
 
 
 /**
  * @brief Create a shared memory IPC mutex with the given id.
- * @param The shared memory id.
+ * @param id The shared memory id.
  * @param rv Receives the shared mutex.
  */
-int onlp_shlock_create(key_t id, onlp_shlock_t** rv,
+int onlp_shlock_create(key_t key, onlp_shlock_t** rv,
                        const char* name, ...);
 
 /**
@@ -88,6 +89,13 @@ const char* onlp_shlock_name(onlp_shlock_t* lock);
  * it is performed at module initialization time.
  */
 void onlp_shlock_global_init(void);
+
+/**
+ * @brief Deinitialize the global lock.
+ * @note You don't normally need to call this as
+ * it is performed at module initialization time.
+ */
+void onlp_shlock_global_deinit(void);
 
 /**
  * @brief Take the global lock.

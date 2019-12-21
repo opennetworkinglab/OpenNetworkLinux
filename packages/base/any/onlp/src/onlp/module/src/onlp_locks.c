@@ -80,7 +80,7 @@ onlp_api_lock_init(void)
 void
 onlp_api_lock_denit(void)
 {
-    /* TODO */
+    onlp_shlock_global_deinit();
 }
 
 void

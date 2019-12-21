@@ -1,21 +1,21 @@
 /************************************************************
  * <bsn.cl v=2014 v=onl>
- * 
- *           Copyright 2015 Big Switch Networks, Inc.          
- * 
+ *
+ *           Copyright 2015 Big Switch Networks, Inc.
+ *
  * Licensed under the Eclipse Public License, Version 1.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- * 
+ *
  *        http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the
  * License.
- * 
+ *
  * </bsn.cl>
  ************************************************************
  *
@@ -58,24 +58,23 @@ shared_pthread_mutex_init__(pthread_mutex_t* mutex)
 }
 
 int
-onlp_shmem_create(key_t key, uint32_t size, void** rvmem)
+onlp_shmem_create(key_t key, int* shmid, uint32_t size, void** rvmem)
 {
     int rv = 0;
-    int shmid;
 
     if(rvmem == NULL) {
         return -1;
     }
     *rvmem = NULL;
 
-#define SHARED_MODE_FLAGS 0
+#define SHARED_MODE_FLAGS 0777
 
 
-    shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | SHARED_MODE_FLAGS) ;
-    if(shmid == -1) {
+    *shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | SHARED_MODE_FLAGS) ;
+    if(*shmid == -1) {
         if(errno == EEXIST) {
-            shmid = shmget(key, size, IPC_CREAT | SHARED_MODE_FLAGS);
-            if(shmid == -1) {
+            *shmid = shmget(key, size, IPC_CREAT | SHARED_MODE_FLAGS);
+            if(*shmid == -1) {
                 /* Exists, but could not be accessed */
                 AIM_LOG_ERROR("shmget failed on existing segment: %{errno}", errno);
                 return -1;
@@ -91,7 +90,7 @@ onlp_shmem_create(key_t key, uint32_t size, void** rvmem)
         rv = 1;
     }
 
-    *rvmem = shmat(shmid, 0, 0);
+    *rvmem = shmat(*shmid, 0, 0);
     if(*rvmem == ( (void*) -1 )) {
         AIM_LOG_ERROR("shmat failed on segment: %{errno}", errno);
         rv = -1;
@@ -105,12 +104,13 @@ struct onlp_shlock_s {
     char name[64];
 
     pthread_mutex_t mutex;
+    int shmid;
 };
 
 #define SHLOCK_MAGIC 0xDEADBEEF
 
 static void
-onlp_shlock_init__(onlp_shlock_t* l, const char* fmt, va_list vargs)
+onlp_shlock_init__(onlp_shlock_t* l, int shmid, const char* fmt, va_list vargs)
 {
     if(l->magic != SHLOCK_MAGIC) {
         if(shared_pthread_mutex_init__(&l->mutex) != 0) {
@@ -120,22 +120,24 @@ onlp_shlock_init__(onlp_shlock_t* l, const char* fmt, va_list vargs)
         char* s = aim_vfstrdup(fmt, vargs);
         aim_strlcpy(l->name, s, sizeof(l->name));
         l->magic = SHLOCK_MAGIC;
+        l->shmid = shmid;
     }
 }
 
 
 int
-onlp_shlock_create(key_t id, onlp_shlock_t** rvl, const char* fmt, ...)
+onlp_shlock_create(key_t key, onlp_shlock_t** rvl, const char* fmt, ...)
 {
 
     onlp_shlock_t* l = NULL;
-    int rv = onlp_shmem_create(id, sizeof(onlp_shlock_t), (void**)&l);
+    int shmid;
+    int rv = onlp_shmem_create(key, &shmid, sizeof(onlp_shlock_t), (void**)&l);
 
     if(rv >= 0) {
         va_list vargs;
         va_start(vargs, fmt);
         /* Initialize if necessary */
-        onlp_shlock_init__(l, fmt, vargs);
+        onlp_shlock_init__(l, shmid, fmt, vargs);
         va_end(vargs);
         *rvl = l;
     }
@@ -150,6 +152,10 @@ int
 onlp_shlock_destroy(onlp_shlock_t* shlock)
 {
     /* Nothing at the moment. */
+    int shmid = shlock->shmid;
+    if(shmctl(shmid, IPC_RMID, NULL) < 0) {
+        AIM_LOG_ERROR("shmctl failed on existing segment: %{errno}", errno);
+    }
     return 0;
 }
 
@@ -221,6 +227,16 @@ onlp_shlock_global_init(void)
         if(onlp_shlock_create(ONLP_SHLOCK_GLOBAL_KEY, &global_lock__,
                               "onlp-global-lock") < 0) {
             AIM_DIE("Global lock created failed.");
+        }
+    }
+}
+
+void
+onlp_shlock_global_deinit(void)
+{
+    if(global_lock__ != NULL) {
+        if(onlp_shlock_destroy(global_lock__) < 0) {
+            AIM_DIE("Global lock destory failed.");
         }
     }
 }
