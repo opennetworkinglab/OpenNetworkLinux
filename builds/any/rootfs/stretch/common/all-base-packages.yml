@@ -64,7 +64,6 @@
 - realpath
 - iptables
 - onl-faultd
-- onlp-snmpd
 - oom-shim
 - python-parted
 - python-yaml
