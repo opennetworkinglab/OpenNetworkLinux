@@ -86,3 +86,4 @@
 - iptables
 - dmsetup
 - libdevmapper1.02.1
+- dbus
