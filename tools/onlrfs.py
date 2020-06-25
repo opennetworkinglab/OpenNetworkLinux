@@ -495,7 +495,7 @@ rm -f /usr/sbin/policy-rc.d
                     lines = open(config).readlines()
                     with open(config, "w") as f:
                         for line in lines:
-                            if line.startswith('PermitRootLogin'):
+                            if 'PermitRootLogin' in line:
                                 v = options['PermitRootLogin']
                                 logger.info("Setting PermitRootLogin to %s" % v)
                                 f.write('PermitRootLogin %s\n' % v)
@@ -691,7 +691,7 @@ if __name__ == '__main__':
         lines = open(config).readlines()
         with open(config, "w") as f:
             for line in lines:
-                if line.startswith('PermitRootLogin'):
+                if 'PermitRootLogin' in line:
                     v = "Yes"
                     logger.info("Setting PermitRootLogin to %s" % v)
                     f.write('PermitRootLogin %s\n' % v)
