@@ -11,14 +11,14 @@
 #define BIT(i)          (1 << (i))
 #define NUM_OF_SFP_PORT 64
 static const int sfp_bus_index[] = {
-  4,  3,  6,  5,  8,  7,  10, 9,
- 12,  11, 14, 13, 16, 15, 18, 17,
- 20, 19, 22, 21, 24, 23, 26, 25,
- 28, 27, 30, 29, 32, 31, 34, 33,
  44, 43, 46, 45, 48, 47, 50, 49,
  52, 51, 54, 53, 56, 55, 58, 57,
  60, 59, 62, 61, 64, 63, 66, 65,
  68, 67, 70, 69, 72, 71, 74, 73, 
+  4,  3,  6,  5,  8,  7,  10, 9,
+ 12,  11, 14, 13, 16, 15, 18, 17,
+ 20, 19, 22, 21, 24, 23, 26, 25,
+ 28, 27, 30, 29, 32, 31, 34, 33,
 };
 
 /************************************************************
@@ -109,13 +109,13 @@ int onlp_sfpi_is_present(onlp_oid_id_t port)
     int offset;
 
     if(port < 16) {
-        bus = 37;
-    }else if(port >=16 && port < 32){
-        bus = 38;
-    }else if(port >=32 && port < 48){
         bus = 77;
-    }else if(port >=48 && port <= 63){
+    }else if(port >=16 && port < 32){
         bus = 78;
+    }else if(port >=32 && port < 48){
+        bus = 37;
+    }else if(port >=48 && port <= 63){
+        bus = 38;
     }
         
     if ((port < 8) || (port >= 16 && port <= 23) || (port >= 32 && port <= 39) \
@@ -150,19 +150,19 @@ onlp_sfpi_presence_bitmap_get(onlp_sfp_bitmap_t* dst)
         {
             case 0: 
             case 1: 
-                    bus = 37;
+                    bus = 77;
                     break;
             case 2:
             case 3: 
-                    bus = 38;
+                    bus = 78;
                     break;
             case 4:
             case 5: 
-                    bus = 77;
+                    bus = 37;
                     break;
             case 6:
             case 7: 
-                    bus = 78;
+                    bus = 38;
                     break;
             default:
                     break;
