@@ -134,25 +134,25 @@ psu_type_t get_psu_type(int id, char* modelname, int modelname_len)
     if (deviceNodeReadString(node, model_name, sizeof(model_name), 0) == 0) {
         if (strncmp(model_name, "CPR-4011-4M11", STRLEN("CPR-4011-4M11")) == 0) {
             if (modelname) {
-            strncpy(modelname, model_name, sizeof(model_name));
+            strncpy(modelname, model_name, sizeof(modelname));
             }
             return PSU_TYPE_AC_COMPUWARE_F2B;
         }
         else if (strncmp(model_name, "CPR-4011-4M21", STRLEN("CPR-4011-4M21")) == 0) {
             if (modelname) {
-            strncpy(modelname, model_name, sizeof(model_name));
+            strncpy(modelname, model_name, sizeof(modelname));
             }
             return PSU_TYPE_AC_COMPUWARE_B2F;
         }
         else if (strncmp(model_name, "CPR-6011-2M11", STRLEN("CPR-6011-2M11")) == 0) {
             if (modelname) {
-                strncpy(modelname, model_name, sizeof(model_name));
+                strncpy(modelname, model_name, sizeof(modelname));
             }
             return PSU_TYPE_AC_COMPUWARE_F2B;
         }
         else if (strncmp(model_name, "CPR-6011-2M21", STRLEN("CPR-6011-2M21")) == 0) {
             if (modelname) {
-                strncpy(modelname, model_name, sizeof(model_name));
+                strncpy(modelname, model_name, sizeof(modelname));
             }
             return PSU_TYPE_AC_COMPUWARE_B2F;
         }
@@ -160,7 +160,7 @@ psu_type_t get_psu_type(int id, char* modelname, int modelname_len)
 
     /* Check 3Y-Power AC model name */
     memset(model_name, 0, sizeof(model_name));
-    node = (id == PSU1_ID) ? PSU1_AC_3YPOWER_EEPROM_NODE(psu_model_name) : PSU2_AC_3YPOWER_EEPROM_NODE(psu_model_name);	
+    node = (id == PSU1_ID) ? PSU1_AC_3YPOWER_EEPROM_NODE(psu_model_name) : PSU2_AC_3YPOWER_EEPROM_NODE(psu_model_name);
 
     if (deviceNodeReadString(node, model_name, sizeof(model_name), 0) == 0) {
         if (strncmp(model_name, "YM-2401JCR", STRLEN("YM-2401JCR")) == 0) {
@@ -207,7 +207,7 @@ int psu_ym2401_pmbus_info_get(int id, char *node, int *value)
 {
     int  ret = 0;
     char path[64] = {0};
-    
+
     *value = 0;
 
     if (PSU1_ID == id) {

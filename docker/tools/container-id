@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 # -*- python -*-
 
 import re
@@ -7,7 +7,7 @@ import sys
 for line in open('/proc/self/cgroup').readlines():
     m = re.search(r'docker-(?P<id>[0-9a-f]{64})', line)
     if m:
-        print m.group('id')[0:12]
+        print(m.group('id')[0:12])
         sys.exit(0)
 
 sys.exit(1)

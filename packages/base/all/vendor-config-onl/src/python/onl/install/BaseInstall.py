@@ -3,29 +3,26 @@
 Base classes for installers.
 """
 
-import os, sys, stat
+import os, stat
 import subprocess
 import re
 import tempfile
 import logging
-import StringIO
 import parted
-import yaml
 import zipfile
 import shutil
 import imp
 import fnmatch, glob
 
-from InstallUtils import SubprocessMixin
-from InstallUtils import MountContext, BlkidParser, PartedParser, UbinfoParser
-from InstallUtils import ProcMountsParser
-from InstallUtils import GdiskParser
-from InstallUtils import OnieSubprocess
-from Plugin import Plugin
+from onl.install.InstallUtils import SubprocessMixin
+from onl.install.InstallUtils import MountContext, BlkidParser, PartedParser, UbinfoParser
+from onl.install.InstallUtils import ProcMountsParser
+from onl.install.InstallUtils import GdiskParser
+from onl.install.InstallUtils import OnieSubprocess
+from onl.install.Plugin import Plugin
 
-import onl.install.ConfUtils
+from onl.install import ConfUtils
 
-import onl.YamlUtils
 from onl.sysconfig import sysconfig
 
 try:
@@ -651,7 +648,7 @@ class GrubInstaller(SubprocessMixin, Base):
 
         self.log.info("extracting partition UUIDs for %s", self.device)
 
-        if isinstance(self.im.grubEnv, onl.install.ConfUtils.GrubEnv):
+        if isinstance(self.im.grubEnv, ConfUtils.GrubEnv):
             # direct (or chroot) access
             gp = GdiskParser(self.device,
                              subprocessContext=self.im.grubEnv,
@@ -868,7 +865,7 @@ class GrubInstaller(SubprocessMixin, Base):
         Base.shutdown(self)
 
 class UBIfsCreater(SubprocessMixin, Base):
-    
+
     def __init__(self, *args, **kwargs):
         Base.__init__(self, *args, **kwargs)
         self.log = logging.getLogger("ubinfo -a")
@@ -916,7 +913,7 @@ class UBIfsCreater(SubprocessMixin, Base):
         return 0
 
     def ubi_mount(self, dir, devpart):
-        
+
         if devpart is None:
             self.log.error("Mount failed.no given mount device part")
             return 1
@@ -957,7 +954,7 @@ class UBIfsCreater(SubprocessMixin, Base):
             self.log.error("Unmount failed.umount command exect failed")
             return 1
         return 0
-        
+
     def ubi_getinfo(self):
         try:
             self.ubiParts = UbinfoParser(log=self.log.getChild("ubinfo -a"))
@@ -967,7 +964,7 @@ class UBIfsCreater(SubprocessMixin, Base):
         return 0
 
     def ubi_installSwi(self):
-        
+
         files = os.listdir(self.im.installerConf.installer_dir) + self.zf.namelist()
 
         swis = [x for x in files if x.endswith('.swi')]
@@ -981,7 +978,7 @@ class UBIfsCreater(SubprocessMixin, Base):
             return 1
 
         base = swis[0]
-        
+
         self.log.info("Installing ONL Software Image (%s)...", base)
         dev = "ONL-IMAGES"
         dstDir = "/tmp/ubifs"
@@ -994,9 +991,9 @@ class UBIfsCreater(SubprocessMixin, Base):
         self.check_call(('sync',))
         self.ubi_unmount(dstDir)
         return 0
-    
+
     def ubi_installLoader(self):
-        
+
         loaderBasename = None
         for c in sysconfig.installer.fit:
             if self.installerExists(c):
@@ -1020,7 +1017,7 @@ class UBIfsCreater(SubprocessMixin, Base):
         return 0
 
     def ubi_installBootConfig(self):
-        
+
         basename = 'boot-config'
 
         self.log.info("Installing boot-config to ONL-BOOT partion")
@@ -1044,7 +1041,7 @@ class UBIfsCreater(SubprocessMixin, Base):
         return 0
 
     def ubi_installOnlConfig(self):
-        
+
         self.log.info("Installing onl-config to ONL-CONFIG partion")
         dev = "ONL-CONFIG"
         dstDir = "/tmp/ubionlconfig"
@@ -1060,10 +1057,10 @@ class UBIfsCreater(SubprocessMixin, Base):
         self.log.info("syncing block devices(%s)...",dev)
         self.check_call(('sync',))
         self.ubi_unmount(dstDir)
-        return 0     
+        return 0
 
 
-class UbootInstaller(SubprocessMixin, UBIfsCreater):
+class UbootInstaller(UBIfsCreater):
 
     class installmeta(Base.installmeta):
 
@@ -1227,7 +1224,7 @@ class UbootInstaller(SubprocessMixin, UBIfsCreater):
 
         code = self.assertUnmounted()
         if code: return code
-        
+
         if "mtdblock" in self.device:
             code = self.ubifsinit()
             if code: return code

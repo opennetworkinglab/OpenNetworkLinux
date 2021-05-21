@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """onlplatform.py
 
@@ -17,7 +17,7 @@ onldir = os.path.dirname(toolsdir)
 onlpydir = os.path.join(onldir, "packages/base/all/vendor-config-onl/src/python")
 sys.path.append(onlpydir)
 
-import onl.YamlUtils
+from onl import YamlUtils
 
 from onlpm import *
 # glob import is required here so pickle load load properly
@@ -48,7 +48,7 @@ def extractKey(platform, arch, key):
     pm.require(pkg, force=False, build_missing=False)
     defaultConfigPath = pm.opr.get_file(pkg, basename)
 
-    platformConf = onl.YamlUtils.merge(defaultConfigPath, platformConfigPath)
+    platformConf = YamlUtils.merge(defaultConfigPath, platformConfigPath)
     resource = platformConf[platform][subkey][key]
     if type(resource) == dict:
         pkg = resource['package']
@@ -75,11 +75,11 @@ def extractVendor(platform, arch):
     return "\n".join(l)
 
 if ops.key in ('kernel', 'initrd', 'dtb', 'itb',):
-    print extractKey(ops.platform, ops.arch, ops.key)
+    print(extractKey(ops.platform, ops.arch, ops.key))
     sys.exit(0)
 
 if ops.key == 'vendor':
-    print extractVendor(ops.platform, ops.arch)
+    print(extractVendor(ops.platform, ops.arch))
     sys.exit(0)
 
 raise SystemExit("invalid key %s" % ops.key)

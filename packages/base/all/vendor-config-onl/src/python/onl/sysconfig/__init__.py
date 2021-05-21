@@ -4,7 +4,6 @@
 #
 ############################################################
 import os
-import sys
 import yaml
 import types
 import onl.onlyaml

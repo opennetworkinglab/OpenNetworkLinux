@@ -1,9 +1,10 @@
 ###############################################################################
 #
-# 
+#
 #
 ###############################################################################
 
 LIBRARY := x86_64_inventec_d10064
 $(LIBRARY)_SUBDIR := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(BUILDER)/lib.mk 
+GCC_NO_WERROR := 1
+include $(BUILDER)/lib.mk

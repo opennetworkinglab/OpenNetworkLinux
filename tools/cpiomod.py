@@ -1,9 +1,7 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 import sys
 import os
 import argparse
-import subprocess
-import shutil
 import tempfile
 
 ap = argparse.ArgumentParser(description="CPIO Modify Tool.")
@@ -49,7 +47,7 @@ class CpioManager(object):
             os.system("cd %s && find . | sudo cpio -H newc -o | gzip -f > %s" % (self.dir, os.path.abspath(ncpio)))
         os.system("sudo rm -rf %s" % (self.dir))
         self.dir = None
-        
+
     def list(self):
         os.system("cd %s && find . -exec ls -l {} \; " % (self.dir))
 
@@ -68,7 +66,7 @@ for md in ops.makedevs:
 
 cm.close(ops.out)
 
-        
-        
 
-                     
+
+
+

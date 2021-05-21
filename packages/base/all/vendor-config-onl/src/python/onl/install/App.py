@@ -6,19 +6,16 @@ top-level install app
 import subprocess
 import sys, os
 import logging
-import imp
-import glob
 import argparse
-import shutil
 import urllib
 import tempfile
 import time
 
-from InstallUtils import InitrdContext
-from InstallUtils import SubprocessMixin
-from InstallUtils import ProcMountsParser
-from ShellApp import OnieBootContext, OnieSysinfo
-import ConfUtils, BaseInstall
+from onl.install.InstallUtils import SubprocessMixin
+from onl.install.InstallUtils import ProcMountsParser
+from onl.install.ShellApp import OnieBootContext, OnieSysinfo
+from onl.install import ConfUtils
+from onl.install import BaseInstall
 
 class App(SubprocessMixin, object):
 
@@ -86,7 +83,7 @@ class App(SubprocessMixin, object):
             sys.stdout.write("\n")
 
             self.log.debug("+ chmod +x %s", p)
-            os.chmod(p, 0755)
+            os.chmod(p, 0o755)
 
             env = {}
             env.update(os.environ)

@@ -5,9 +5,7 @@
 ############################################################
 import sys
 import os
-from onl.platform.base import OnlPlatformBase
 from onl.platform.current import OnlPlatform
-import shutil
 
 def msg(s, fatal=False):
     sys.stderr.write(s)

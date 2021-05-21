@@ -1,5 +1,5 @@
 import subprocess
-
+import os
 class OnlServiceMixin(object):
     def _execute(self, cmd, root=False, ex=True):
         self.logger.debug("Executing: %s" % cmd)
@@ -7,7 +7,7 @@ class OnlServiceMixin(object):
             cmd = "sudo " + cmd
         try:
             subprocess.check_call(cmd, shell=True)
-        except Exception, e:
+        except Exception as e:
             if ex:
                 self.logger.error("Command failed: %s" % e)
                 raise

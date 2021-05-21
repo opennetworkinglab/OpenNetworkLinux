@@ -1,19 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 ############################################################
 #
 # ONL PKI Management
 #
 ############################################################
-import sys
 import os
 import argparse
 import logging
 import tempfile
-import shutil
-import subprocess
 import tempfile
-import yaml
-from onl.mounts import OnlMountManager, OnlMountContextReadOnly, OnlMountContextReadWrite
+from onl.mounts import OnlMountContextReadOnly, OnlMountContextReadWrite
 from onl.sysconfig import sysconfig
 from onl.util import *
 
@@ -68,7 +64,7 @@ class OnlPki(OnlServiceMixin):
                 self.logger.info("Generating self-signed certificate...")
                 csr = tempfile.NamedTemporaryFile(prefix="pki-", suffix=".csr", delete=False)
                 csr.close()
-                fields = [ "%s=%s" % (k, v) for k,v in sysconfig.pki.cert.csr.fields.iteritems() ]
+                fields = [ "%s=%s" % (k, v) for k,v in sysconfig.pki.cert.csr.fields.items() ]
                 subject = "/" + "/".join(fields)
                 self.logger.debug("Subject: '%s'", subject)
                 self.logger.debug("CSR: %s", csr.name)

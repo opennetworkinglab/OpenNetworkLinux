@@ -437,6 +437,11 @@ gzip -dc "$initrd" | ( cd "$rootdir" && cpio -imd )
 # get common installer functions
 . "${rootdir}/lib/vendor-config/onl/install/lib.sh"
 
+# patching python install dir, the initrd uses python3.9, but we are using python 3.7
+# in both ONL and the builder.
+mkdir -p "${rootdir}/usr/lib/python3.9/site-packages/"
+cp -r "${rootdir}/usr/lib/python3.7/site-packages/onl" "${rootdir}/usr/lib/python3.9/site-packages/onl"
+
 installer_mkchroot "${rootdir}"
 
 # make the installer available to the chroot

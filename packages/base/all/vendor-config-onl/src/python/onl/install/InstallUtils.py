@@ -11,7 +11,7 @@ import string
 import shutil
 import re
 
-import Fit, Legacy
+from onl.install import Fit, Legacy
 
 class SubprocessMixin:
 
@@ -33,7 +33,7 @@ class SubprocessMixin:
 
         vmode = kwargs.pop('vmode', None)
         if vmode == self.V1 and self.log.isEnabledFor(logging.DEBUG):
-            if isinstance(cmd, basestring):
+            if isinstance(cmd, str):
                 raise ValueError("vmode=V1 requires a list")
             cmd = list(cmd)
             cmd[1:1] = ['-v',]
@@ -49,7 +49,7 @@ class SubprocessMixin:
             kwargs['stdout'] = fno
             kwargs['stderr'] = subprocess.STDOUT
 
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, str):
             self.log.debug("+ " + cmd)
         else:
             self.log.debug("+ " + " ".join(cmd))
@@ -79,7 +79,7 @@ class SubprocessMixin:
 
         vmode = kwargs.pop('vmode', None)
         if vmode == self.V1 and self.log.isEnabledFor(logging.DEBUG):
-            if isinstance(cmd, basestring):
+            if isinstance(cmd, str):
                 raise ValueError("vmode=V1 requires a list")
             cmd = list(cmd)
             cmd[1:1] = ['-v',]
@@ -94,21 +94,21 @@ class SubprocessMixin:
                                           suffix='out')
             kwargs['stderr'] = fno
 
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, str):
             self.log.debug("+ " + cmd)
         else:
             self.log.debug("+ " + " ".join(cmd))
 
         if vmode == self.V2 and self.log.isEnabledFor(logging.DEBUG):
             try:
-                return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs)
+                return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs).decode("utf8")
             finally:
                 with open(v2Out) as fd:
                     sys.stderr.write(fd.read())
                 os.unlink(v2Out)
         else:
             try:
-                return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs)
+                return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs).decode("utf8")
             except subprocess.CalledProcessError:
                 return ''
 
@@ -249,7 +249,7 @@ class MountContext(SubprocessMixin):
         if dev is None:
             try:
                 dev = self.check_output(('blkid', '-L', self.label,)).strip()
-            except subprocess.CalledProcessError, what:
+            except subprocess.CalledProcessError as what:
                 raise ValueError("cannot find label %s: %s"
                                  % (self.label, str(what),))
 
@@ -1242,7 +1242,7 @@ class ChrootSubprocessMixin:
             cmd = args.pop(0)
         else:
             cmd = kwargs.pop('cmd')
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, str):
             cmd = ('chroot', self.chrootDir,
                    '/bin/sh', '-c', 'IFS=;' + cmd,)
         else:
@@ -1268,7 +1268,7 @@ class ChrootSubprocessMixin:
             cmd = args.pop(0)
         else:
             cmd = kwargs.pop('cmd')
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, str):
             cmd = ('chroot', self.chrootDir,
                    '/bin/sh', '-c', 'IFS=;' + cmd,)
         else:
@@ -1277,10 +1277,10 @@ class ChrootSubprocessMixin:
         if not self.mounted:
             with InitrdContext(dir=self.chrootDir, log=self.log) as ctx:
                 self.log.debug("+ " + " ".join(cmd))
-                return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs)
+                return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs).decode("utf8")
         else:
             self.log.debug("+ " + " ".join(cmd))
-            return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs)
+            return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs).decode("utf8")
 
 class OnieSubprocess:
     """Simple subprocess mixin that defers to onie-shell."""
@@ -1300,7 +1300,7 @@ class OnieSubprocess:
             cmd = args.pop(0)
         else:
             cmd = kwargs.pop('cmd')
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, str):
             cmd = ('onie-shell', '-c', 'IFS=;' + cmd,)
         else:
             cmd = ['onie-shell', '-c',] + " ".join(cmd)
@@ -1320,10 +1320,10 @@ class OnieSubprocess:
             cmd = args.pop(0)
         else:
             cmd = kwargs.pop('cmd')
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, str):
             cmd = ('onie-shell', '-c', 'IFS=;' + cmd,)
         else:
             cmd = ['onie-shell', '-c',] + " ".join(list(cmd))
 
         self.log.debug("+ " + " ".join(cmd))
-        return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs)
+        return subprocess.check_output(cmd, *args, cwd=cwd, **kwargs).decode("utf8")

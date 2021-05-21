@@ -6,9 +6,9 @@ Config interfaces to different backend mechanisms.
 import os
 import logging
 import subprocess
-from InstallUtils import SubprocessMixin, ChrootSubprocessMixin, MountContext
-from InstallUtils import OnieSubprocess
-from cStringIO import StringIO
+from onl.install.InstallUtils import SubprocessMixin, ChrootSubprocessMixin, MountContext
+from onl.install.InstallUtils import OnieSubprocess
+from io import StringIO
 import re
 
 from onl.sysconfig import sysconfig
@@ -42,7 +42,7 @@ class ConfBase:
         elif len(args) == 0:
             try:
                 return self.__dict__['_data'][attr]
-            except KeyError, what:
+            except KeyError as what:
                 raise AttributeError(str(what))
         else:
             raise ValueError("extra arguments")
@@ -54,7 +54,7 @@ class ConfBase:
         """Generate a serialized representation."""
         buf = StringIO()
         data = self.__dict__.get('_data', {})
-        for key, val in data.iteritems():
+        for key, val in data.items():
             buf.write("%s=\"%s\"\n" % (key, val,))
         return buf.getvalue()
 
@@ -75,7 +75,7 @@ class ConfFileBase(ConfBase):
         self.__dict__['_data'] = {}
         if self.SHELL:
             cmd = "IFS=; set -e; . '%s'; set +e; set | egrep ^[a-zA-Z][a-zA-Z0-9_]*=" % self.path
-            buf = subprocess.check_output(cmd, shell=True)
+            buf = subprocess.check_output(cmd, shell=True).decode("utf8")
             for line in buf.splitlines(False):
                 self._feedLine(line)
         else:
@@ -142,10 +142,10 @@ class GrubEnv(SubprocessMixin):
         if self.bootPart:
             with self.mountCtx(self.bootPart) as ctx:
                 p = os.path.join(ctx.dir, self.path.lstrip('/'))
-                buf = self.check_output((self.EDITENV, p, 'list',)).strip()
+                buf = self.check_output((self.EDITENV, p, 'list',)).decode("utf8").strip()
         else:
             p = os.path.join(self.bootDir, self.path.lstrip('/'))
-            buf = self.check_output((self.EDITENV, p, 'list',)).strip()
+            buf = self.check_output((self.EDITENV, p, 'list',)).decode("utf8").strip()
         cf = ConfBuf(buf)
         return cf.__dict__['_data']
 
@@ -161,7 +161,7 @@ class GrubEnv(SubprocessMixin):
             return d.get(attr, args[0])
         try:
             return d[attr]
-        except KeyError, what:
+        except KeyError as what:
             raise AttributeError(str(what))
 
     def __setattr__(self, attr, val):
@@ -194,7 +194,7 @@ class GrubEnv(SubprocessMixin):
 
         uidx = None
         if self.isUEFI:
-            buf = self.check_output((self.EFIBOOTMGR,))
+            buf = self.check_output((self.EFIBOOTMGR,)).decode("utf8")
             for line in buf.splitlines(False):
                 m = self.EFI_BOOT_RE.match(line)
                 if m:
@@ -202,7 +202,7 @@ class GrubEnv(SubprocessMixin):
                         uidx = m.group(1)
                         break
         if uidx is not None:
-            self.check_output((self.EFIBOOTMGR, '-b', uidx, '-B',))
+            self.check_output((self.EFIBOOTMGR, '-b', uidx, '-B',)).decode("utf8")
 
         grubOpts = []
         if self.isUEFI:
@@ -383,13 +383,13 @@ class ProxyGrubEnv(SubprocessMixin):
 
     def install(self, device):
         self.log.warn("deferring commands to %s...", self.installerConf.installer_postinst)
-
+        cmds = []
         cmds.append("os_name=\"%s\"" % sysconfig.installer.os_name)
 
         if self.isUEFI:
             sub = OnieSubprocess(log=self.log.getChild("onie"))
             cmd = (self.EFIBOOTMGR,)
-            buf = sub.check_output(cmd)
+            buf = sub.check_output(cmd).decode("utf8")
             bidx = None
             for line in buf.splitlines(False):
                 m = self.EFI_BOOT_RE.match(line)
@@ -484,7 +484,7 @@ class UbootEnv(SubprocessMixin):
         self.__dict__['hasForceUpdate'] = False
         try:
             out = self.check_output((self.SETENV, '--help',),
-                                    stderr=subprocess.STDOUT)
+                                    stderr=subprocess.STDOUT).decode("utf8")
             if "-f" in out and "Force update" in out:
                 self.__dict__['hasForceUpdate'] = True
         except subprocess.CalledProcessError:
@@ -499,7 +499,7 @@ class UbootEnv(SubprocessMixin):
         with open(os.devnull, "w") as nfd:
             try:
                 out = self.check_output((self.PRINTENV, '-n', attr,),
-                                        stderr=nfd.fileno())
+                                        stderr=nfd.fileno()).decode("utf8")
             except subprocess.CalledProcessError:
                 out = None
 
@@ -524,7 +524,7 @@ class UbootEnv(SubprocessMixin):
             self.check_call((self.SETENV, attr,))
 
     def asDict(self):
-        buf = self.check_output((self.PRINTENV,)).strip()
+        buf = self.check_output((self.PRINTENV,)).decode("utf8").strip()
         return ConfBuf(buf).__dict__['_data']
 
     toDict = asDict

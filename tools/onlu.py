@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 #
 # Common utilities for the ONL python tools.
@@ -12,7 +12,11 @@ import os
 import fcntl
 import glob
 from string import Template
+import string
+import random
 import time
+import fileinput
+import crypt
 
 logger = None
 
@@ -121,7 +125,7 @@ def execute(args, sudo=False, chroot=None, ex=None):
         try:
             subprocess.check_call(args, shell=shell)
             rv = 0
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             if ex:
                 raise ex
             rv = e.returncode
@@ -132,7 +136,7 @@ def execute(args, sudo=False, chroot=None, ex=None):
 # Flatten lists if string lists
 def sflatten(coll):
     for i in coll:
-            if isinstance(i, Iterable) and not isinstance(i, basestring):
+            if isinstance(i, Iterable) and not isinstance(i, str):
                 for subc in sflatten(i):
                     if subc:
                         yield subc
@@ -161,10 +165,10 @@ def userdel(username):
     # Can't use the userdel command because of potential uid 0 in-user problems while running ourselves
     for line in fileinput.input('/etc/passwd', inplace=True):
         if not line.startswith('%s:' % username):
-            print line,
+            print(line)
     for line in fileinput.input('/etc/shadow', inplace=True):
         if not line.startswith('%s:' % username):
-            print line,
+            print(line)
 
 ############################################################
 #
@@ -178,15 +182,15 @@ def useradd(username, uid, password, shell, deleteFirst=True):
         userdel(username)
 
     if password:
-        epassword=crypt.crypt(password, '$1$%s$' % gen_salt());
+        epassword=crypt.crypt(password, '$1$%s$' % gen_salt())
         args = args + ['-p', epassword]
 
     args.append(username)
 
-    cc(args);
+    subprocess.run(args)
 
     if password is None:
-        cc(('passwd', '-d', username))
+        subprocess.run(('passwd', '-d', username))
 
     logger.info("user %s password %s", username, password)
 
@@ -240,12 +244,12 @@ def filepath(absdir, relpath, eklass, required=True):
 def validate_src_dst_file_tuples(absdir, data, dstsubs, eklass, required=True):
     files = []
     if type(data) is dict:
-        for (s,d) in data.iteritems():
+        for (s,d) in data.items():
             files.append((s,d))
     elif type(data) is list:
         for e in data:
             if type(e) is dict:
-                for (s,d) in e.iteritems():
+                for (s,d) in e.items():
                     files.append((s,d))
             elif type(e) in [ list, tuple ]:
                 if len(e) != 2:

@@ -11,7 +11,7 @@ class OnlPlatformMellanox(OnlPlatformBase):
     # and the machine.conf file to implement parts of ONLP.
     #
     def syseeprom_export(self):
-        print "Caching ONIE System EEPROM..."
+        print("Caching ONIE System EEPROM...")
         onie = self.onie_syseeprom_get()
         mc = self.onie_machine_get()
         # XXX roth -- deprecated

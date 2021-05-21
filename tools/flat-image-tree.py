@@ -1,11 +1,11 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 #
 # Flat Image Tree Generator
 #
 ############################################################
-import subprocess
 import yaml
+import json
 import tempfile
 
 import os, sys
@@ -136,9 +136,9 @@ class DtbImage(Image):
 
     def __init__(self, fdata, arch):
         Image.__init__(self, "flat_dt", fdata, compression="none")
-	if arch == 'arm64':
-		self.load = "<0x90000000>"
-		self.entry ="<0x90000000>"
+        if arch == 'arm64':
+            self.load = "<0x90000000>"
+            self.entry ="<0x90000000>"
 
     def write(self, f):
         self.start_image(f)
@@ -212,7 +212,7 @@ class FlatImageTree(object):
         self.add_dict(name, d)
 
     def add_platform_package(self, package):
-        print package
+        print(package)
         platform = package.replace(":%s" % ops.arch, "").replace("onl-platform-config-", "")
 
         vpkg = "onl-vendor-config-onl:all"
@@ -279,7 +279,7 @@ class FlatImageTree(object):
 
         f.write("""    };\n""")
         f.write("""    configurations {\n""")
-        for (name, (kernel, dtb, initrd)) in self.configurations.iteritems():
+        for (name, (kernel, dtb, initrd)) in self.configurations.items():
             f.write("""        %s {\n""" % name)
             f.write("""            description = "%s";\n""" % name)
             f.write("""            kernel = "%s";\n""" % (KernelImage(kernel, ops.arch).name))
@@ -360,7 +360,7 @@ if __name__ == '__main__':
     else:
         its = ops.its
         if its is None:
-            its = tempfile.NamedTemporaryFile(delete=False)
+            its = tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf8')
             fit.writef(its)
             its.close()
             its = its.name

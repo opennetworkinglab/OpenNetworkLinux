@@ -3,7 +3,7 @@
 Parse FIT files.
 """
 
-import os, sys
+import sys
 import logging
 import struct
 import argparse
@@ -166,7 +166,7 @@ class Parser:
                 continue
 
             if tag == self.FDT_NOP:
-                print "NOP"
+                print("NOP")
                 continue
 
             if tag == self.FDT_END:
@@ -534,7 +534,7 @@ class App:
 
         try:
             args = ap.parse_args()
-        except SystemExit, what:
+        except SystemExit as what:
             return what.code
 
         if args.quiet:

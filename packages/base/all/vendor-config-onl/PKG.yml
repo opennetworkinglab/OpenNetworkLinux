@@ -12,8 +12,8 @@ packages:
     summary: ONL Base Configuration Package
 
     files:
-      - src/python/onl : $PY_INSTALL/onl
-      - $ONL/tools/onlyaml.py : $PY_INSTALL/onl/onlyaml/__init__.py
+      - src/python/onl : ${PY_INSTALL}/onl
+      - $ONL/tools/onlyaml.py : ${PY_INSTALL}/onl/onlyaml/__init__.py
       - src/etc : /etc
       - src/boot.d : /etc/boot.d
       - src/bin : /usr/bin

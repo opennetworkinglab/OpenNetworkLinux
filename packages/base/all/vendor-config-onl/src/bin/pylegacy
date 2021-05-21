@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """Swiss-army-knife legacy U-Boot image decoder
 """

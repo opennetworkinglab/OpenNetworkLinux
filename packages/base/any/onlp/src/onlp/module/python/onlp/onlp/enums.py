@@ -8,7 +8,7 @@
 class Enumeration(object):
     @classmethod
     def name(klass, value):
-        for (k, v) in klass.__dict__.iteritems():
+        for (k, v) in klass.__dict__.items():
             if v == value:
                 return k
         return None

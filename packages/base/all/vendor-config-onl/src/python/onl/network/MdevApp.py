@@ -8,7 +8,6 @@ import os, sys
 import onl.platform.current
 import subprocess
 
-import logging
 logger = None
 
 def do_add(device):

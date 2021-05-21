@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 #
 # ONL Package Management
@@ -6,21 +6,21 @@
 ############################################################
 import argparse
 import os
+import errno
 import sys
 import logging
 import yaml
 import tempfile
 import shutil
 import pprint
-import subprocess
 import glob
 import submodules
 import onlyaml
 import onlu
-from string import Template
 import re
 import json
 import lsb_release
+import pickle
 
 g_dist_codename = lsb_release.get_distro_information().get('CODENAME')
 
@@ -62,8 +62,9 @@ class OnlPackageServiceScript(object):
         if self.SCRIPT is None:
             raise AttributeError("The SCRIPT attribute must be provided by the deriving class.")
 
-        with tempfile.NamedTemporaryFile(dir=dir, delete=False) as f:
-            f.write(self.SCRIPT % dict(service=os.path.basename(service.replace(".init", ""))))
+        with tempfile.NamedTemporaryFile(dir=dir, delete=False, mode='w', encoding='utf8') as f:
+            content = self.SCRIPT % dict(service=os.path.basename(service.replace(".init", "")))
+            f.write(content)
             self.name = f.name
 
 
@@ -130,7 +131,7 @@ class OnlPackage(object):
         'license' : 'unknown',
 
         # Default Python Package Installation
-        'PY_INSTALL' : '/usr/lib/python2.7/dist-packages',
+        'PY_INSTALL' : '/usr/lib/python3.7/site-packages',
 
         # Default Builder build directory name. Must match setup.env
         'BUILD_DIR' : 'BUILD/%s' % g_dist_codename,
@@ -178,7 +179,9 @@ class OnlPackage(object):
         #
         # The key value precedence is package dict, common dict, default dict.
         #
-        self.pkg = dict(ddict.items() + cdict.items() + pdict.items())
+        self.pkg = ddict.copy()
+        self.pkg.update(cdict)
+        self.pkg.update(pdict)
 
         # Validate all required package keys are present and well-formed.
         if not 'external' in self.pkg:
@@ -303,8 +306,8 @@ class OnlPackage(object):
                 dstpath = os.path.join(root, dst)
                 try:
                     os.makedirs(dstpath)
-                except OSError, e:
-                    if e.errno != os.errno.EEXIST:
+                except OSError as e:
+                    if e.errno != errno.EEXIST:
                         raise
                 shutil.copy(src, dstpath)
             else:
@@ -362,7 +365,7 @@ class OnlPackage(object):
             if os.path.exists(src):
                 OnlPackage.copyf(src, dst, root)
 
-        for (link, src) in self.pkg.get('links', {}).iteritems():
+        for (link, src) in self.pkg.get('links', {}).items():
             logger.info("Linking %s -> %s..." % (link, src))
             # The source must be relative to the existing root directory.
             if link.startswith('/'):
@@ -798,7 +801,7 @@ class OnlPackageRepo(object):
         with self.lock:
             path = self.lookup(pkg)
             if path:
-                print "** %s contents:" % path
+                print("** %s contents:" % path)
                 onlu.execute(['dpkg', '-c', path])
 
 
@@ -868,7 +871,6 @@ class OnlPackageManager(object):
     def load(self, basedir, usecache=True, rebuildcache=False):
         pkgspec = [ 'PKG.yml', 'pkg.yml' ]
 
-        import cPickle as pickle
         CACHE=os.path.join(basedir, '.PKGs.cache.%s' % g_dist_codename)
 
         # Lock the CACHE file
@@ -907,7 +909,7 @@ class OnlPackageManager(object):
                             pg.load(os.path.join(root, f))
                             logger.debug('  Loaded package file %s' % os.path.join(root, f))
                             self.package_groups.append(pg)
-                        except OnlPackageError, e:
+                        except OnlPackageError as e:
                             logger.error("%s: " % e)
                             logger.warn("Skipping %s due to errors." % os.path.join(root, f))
 
@@ -954,7 +956,7 @@ class OnlPackageManager(object):
                         try:
                             manager = submodules.OnlSubmoduleManager(root)
                             manager.require(path, depth=depth, recursive=recursive)
-                        except submodules.OnlSubmoduleError, e:
+                        except submodules.OnlSubmoduleError as e:
                             raise OnlPackageError(e.value)
 
                 # Process prerequisite packages
@@ -1018,7 +1020,7 @@ class OnlPackageManager(object):
     def list(self):
         rv = {}
         for pg in self.filtered_package_groups():
-            for (p,d) in pg.list().iteritems():
+            for (p,d) in pg.list().items():
                 rv[p] = d
         return rv
 
@@ -1029,7 +1031,7 @@ class OnlPackageManager(object):
         TARGETS={}
         ARCHS={}
 
-        for (p,d) in packages.iteritems():
+        for (p,d) in packages.items():
             (name,arch) = p.split(':')
             target = p.replace(':', '_')
             depends = " ".join(d.get('packages', [])).replace(':', '_')
@@ -1055,13 +1057,13 @@ class OnlPackageManager(object):
         handle.write("# These are the rules that build each individual package.\n")
         handle.write("#\n")
         handle.write("############################################################\n")
-        for (t, d) in TARGETS.iteritems():
+        for (t, d) in TARGETS.items():
             handle.write("%s : %s\n" % (t, d['depends']))
             handle.write("\ttouch building/%s\n" % t)
             handle.write("\tonlpm.py --require %s\n" % d['package'])
             handle.write("\tmv building/%s finished/\n" % (t))
 
-        for (arch, targets) in ARCHS.iteritems():
+        for (arch, targets) in ARCHS.items():
             handle.write("############################################################\n")
             handle.write("#\n")
             handle.write("# These rules represent the build stages for arch='%s'\n" % arch)
@@ -1115,7 +1117,7 @@ def defaultPm():
     if envJson:
         for j in envJson.split(':'):
             data = json.load(open(j))
-            for (k, v) in data.iteritems():
+            for (k, v) in data.items():
                 try:
                     v = v.encode('ascii')
                 except UnicodeEncodeError:
@@ -1184,7 +1186,7 @@ if __name__ == '__main__':
     if ops.include_env_json:
         for j in ops.include_env_json.split(':'):
             data = json.load(open(j))
-            for (k, v) in data.iteritems():
+            for (k, v) in data.items():
                 try:
                     v = v.encode('ascii')
                 except UnicodeEncodeError:
@@ -1224,7 +1226,7 @@ if __name__ == '__main__':
 
         if ops.in_repo:
             for p in ops.in_repo:
-                print "%s: %s" % (p, p in pm.opr)
+                print("%s: %s" % (p, p in pm.opr))
             sys.exit(0)
 
         for pdir in ops.packagedirs:
@@ -1237,9 +1239,9 @@ if __name__ == '__main__':
                 for p in pg.packages:
                     if p.tagged(ops.list_tagged):
                         if ops.arch in [ p.pkg['arch'], "all", None ]:
-                            print "%-64s" % p.id(),
+                            print("%-64s" % p.id(),)
                             if ops.show_group:
-                                print "[ ", pg._pkgs['__source'], "]",
+                                print("[ ", pg._pkgs['__source'], "]",)
                             print
 
         if ops.list_platforms:
@@ -1248,14 +1250,14 @@ if __name__ == '__main__':
                 sys.exit(1)
             platforms = pm.list_platforms(ops.arch)
             if ops.csv:
-                print ','.join(platforms)
+                print(','.join(platforms))
             else:
                 for p in platforms:
-                    print "%-64s" % p
+                    print("%-64s" % p)
 
         # List all packages, no filtering
         if ops.list_all:
-            print pm
+            print(pm)
 
         if ops.pmake:
             pm.pmake()
@@ -1264,10 +1266,10 @@ if __name__ == '__main__':
         pm.filter(subdir = ops.subdir, arches=ops.arches)
 
         if ops.list:
-            print pm
+            print(pm)
 
         if ops.pkg_info:
-            print pm.pkg_info()
+            print(pm.pkg_info())
 
 
         ############################################################
@@ -1299,13 +1301,13 @@ if __name__ == '__main__':
             (p, f) = ops.find_file
             pm.require(p, force=ops.force, build_missing=not ops.no_build_missing)
             path = pm.opr.get_file(p, f)
-            print path
+            print(path)
 
         if ops.find_dir:
             (p, d) = ops.find_dir
             pm.require(p, force=ops.force, build_missing=not ops.no_build_missing)
             path = pm.opr.get_dir(p, d)
-            print path
+            print(path)
 
         if ops.link_file:
             for (p, f, dst) in ops.link_file:
@@ -1358,7 +1360,7 @@ if __name__ == '__main__':
             path = pm.opr.get_file(ops.platform_manifest, 'manifest.json')
             if path:
                 m = json.load(open(path))
-                print " ".join(m['platforms'])
+                print(" ".join(m['platforms']))
 
 
         ############################################################
@@ -1372,8 +1374,8 @@ if __name__ == '__main__':
         if ops.lookup:
             logger.debug("looking up %s", ops.lookup)
             for p in pm.opr.lookup_all(ops.lookup):
-                print p
+                print(p)
 
-    except (OnlPackageError, onlyaml.OnlYamlError), e:
+    except (OnlPackageError, onlyaml.OnlYamlError) as e:
         logger.error(e)
         sys.exit(1)
