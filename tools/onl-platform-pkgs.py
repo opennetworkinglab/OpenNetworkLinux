@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 #
 # This script expects a yaml file containing the list
@@ -10,8 +10,8 @@
 # of platforms.
 #
 import onlyaml
-import argparse
 import onlu
+import argparse
 import os
 
 ap = argparse.ArgumentParser(description='ONL Platform Package Lister')
@@ -41,7 +41,7 @@ if not ops.no_builtins:
 
 for p in platforms:
     for pattern in PATTERNS:
-        print "- ", pattern % dict(platform=p)
+        print("- ", pattern % dict(platform=p))
 
 
 

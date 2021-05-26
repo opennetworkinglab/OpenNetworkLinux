@@ -1,15 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 ############################################################
 #
 # ONL System Upgrade
 #
 ############################################################
 import os
-import sys
-import fnmatch
 from onl.upgrade import ubase
 from onl.sysconfig import sysconfig
-from onl.mounts import OnlMountManager, OnlMountContextReadOnly, OnlMountContextReadWrite
 
 from onl.install.SystemInstall import App
 

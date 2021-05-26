@@ -16,7 +16,7 @@ class HostInfo:
 
         if scope is None and host.startswith('fe80:'):
             cmd = ('ip', '-6', '-oneline', 'route', 'show',)
-            for line in subprocess.check_output(cmd).splitlines(False):
+            for line in subprocess.check_output(cmd).decode("utf8").splitlines(False):
                 words = line.split()
                 if words[0].startswith('fe80:'):
                     scope = words[2]

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 #
 # Simple JSON Generator
@@ -78,7 +78,7 @@ if ops.kl:
 
 out=sys.stdout
 if ops.out and ops.out not in ['-', 'stdout']:
-    print ops.out
+    print(ops.out)
     out = open(ops.out, "w")
 
 json.dump(g_data, out, indent=ops.indent)

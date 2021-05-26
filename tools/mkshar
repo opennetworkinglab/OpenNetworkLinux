@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """mkshar
 
@@ -94,7 +94,7 @@ def _zipopts(path):
         return ZIP_COMPRESS_OPTS
 
 # block to 512 bytes
-buf = open(sfx).read()
+buf = open(sfx, 'rb').read()
 sz = len(buf)
 logger.info("script size is %d bytes", sz)
 rem = sz % opts.blocksize
@@ -105,10 +105,10 @@ if opts.unzip_pad:
     pad = pad + opts.blocksize
 
 if pad == 1:
-    buf += "\n"
+    buf += b"\n"
 elif pad > 1:
     pad -= 1
-    buf = buf + ('#' * pad) + "\n"
+    buf = buf + (b'#' * pad) + b"\n"
 
 logger.info("padded script size is %d bytes", len(buf))
 
@@ -132,66 +132,66 @@ _addfiles(args, *o)
 
 def _splice(tag, val):
     global buf
-    pat = tag + '='
+    pat = tag + b'='
     p = buf.find(pat)
-    q = buf.find("\n", p+1)
+    q = buf.find(b"\n", p+1)
     if p < 0:
         raise ValueError("cannot find tag %s" % repr(tag))
     llen = q - p
-    line = "%s=%s #" % (tag, str(val),)
+    line = b"%s=%s #" % (tag, val)
     if len(line) > llen:
         raise SystemExit("cannot insert byte count marker")
     llen -= len(line)
-    line = line + ('#' * llen)
+    line = line + (b'#' * llen)
     buf = buf[:p] + line + buf[q:]
 
 def _spliceMaybe(tag, val):
-    val = "${%s-\"%s\"}" % (tag, val,)
+    val = b"${%s-\"%s\"}" % (tag, val)
     _splice(tag, val)
 
 logger.info("prepping SFX")
 
-_splice('SFX_BYTES', len(buf))
-_splice('SFX_BLOCKSIZE', opts.blocksize)
-_splice('SFX_INSTALL', os.path.split(install)[1])
-_splice('SFX_CHECKSUM', '')
+_splice(b'SFX_BYTES', str(len(buf)).encode('utf8'))
+_splice(b'SFX_BLOCKSIZE', str(opts.blocksize).encode('utf8'))
+_splice(b'SFX_INSTALL', os.path.split(install)[1].encode('utf8'))
+_splice(b'SFX_CHECKSUM', b'')
 if opts.lazy:
-    _splice('SFX_LAZY', '1')
+    _splice(b'SFX_LAZY', b'1')
 else:
-    _splice('SFX_LAZY', '')
+    _splice(b'SFX_LAZY', b'')
 if opts.unzip_sfx:
-    _spliceMaybe('SFX_UNZIP', '1')
+    _spliceMaybe(b'SFX_UNZIP', b'1')
 else:
-    _spliceMaybe('SFX_UNZIP', '')
+    _spliceMaybe(b'SFX_UNZIP', b'')
 if opts.unzip_pipe:
-    _spliceMaybe('SFX_PIPE', '1')
+    _spliceMaybe(b'SFX_PIPE', b'1')
 else:
-    _spliceMaybe('SFX_PIPE', '')
+    _spliceMaybe(b'SFX_PIPE', b'')
 if opts.unzip_loop:
-    _spliceMaybe('SFX_LOOP', '1')
+    _spliceMaybe(b'SFX_LOOP', b'1')
 else:
-    _spliceMaybe('SFX_LOOP', '')
+    _spliceMaybe(b'SFX_LOOP', b'')
 if opts.unzip_pad:
-    _splice('SFX_PAD', 'pad.bin')
+    _splice(b'SFX_PAD', b'pad.bin')
 else:
-    _splice('SFX_PAD', '')
+    _splice(b'SFX_PAD', b'')
 if opts.fixup_perms:
-    _splice('SFX_PERMS', opts.fixup_perms)
+    _splice(b'SFX_PERMS', opts.fixup_perms.encode('utf8'))
 if opts.inplace:
-    _spliceMaybe('SFX_INPLACE', '1')
+    _spliceMaybe(b'SFX_INPLACE', b'1')
 else:
-    _spliceMaybe('SFX_INPLACE', '')
+    _spliceMaybe(b'SFX_INPLACE', b'')
 
 # remember the checksum offset
-ckStart = buf.find("SFX_CHECKSUM=")
-ckEnd = buf.find("\n", ckStart+1)
+ckStart = buf.find(b"SFX_CHECKSUM=")
+ckEnd = buf.find(b"\n", ckStart+1)
 
 logger.info("generating shar")
 
 if opts.unzip_pad:
 
-    wfd = open(shar, "w+")
-    rfd = open(zipFile, "r")
+    wfd = open(shar, "wb+")
+    rfd = open(zipFile, "rb")
     shutil.copyfileobj(rfd, wfd)
     rfd.close()
 
@@ -214,9 +214,9 @@ if opts.unzip_pad:
 
 else:
 
-    wfd = open(shar, "w")
+    wfd = open(shar, "wb")
     wfd.write(buf)
-    rfd = open(zipFile, "r")
+    rfd = open(zipFile, "rb")
     shutil.copyfileobj(rfd, wfd)
     rfd.close()
     wfd.close()
@@ -230,7 +230,7 @@ ckf = hashlib.md5()
 ckf.update(buf[:ckStart])
 ckf.update(buf[ckEnd+1:])
 
-rfd = open(shar, "r")
+rfd = open(shar, "rb")
 rfd.seek(len(buf), 0)
 while True:
     buf = rfd.read(10*1024)
@@ -245,7 +245,7 @@ wfd.write("SFX_CHECKSUM=%s #" % ckf.hexdigest())
 wfd.close()
 
 logger.info("+ /bin/chmod +x %s", shar)
-os.chmod(shar, 0755)
+os.chmod(shar, 0o755)
 
 logger.debug("+ /bin/rm %s", zipFile)
 os.unlink(zipFile)

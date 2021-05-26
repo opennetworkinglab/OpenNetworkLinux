@@ -1,14 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import os
 import sys
-import platform
 import subprocess
 import logging
 import time
-import json
 import yaml
-import tempfile
-import shutil
 
 class MountManager(object):
 
@@ -33,7 +29,7 @@ class MountManager(object):
 
     def is_dev_mounted(self, device):
         self.read_proc_mounts()
-        for (k, v) in self.mounts.iteritems():
+        for (k, v) in self.mounts.items():
             if v['dev'] == device:
                 return True
         return False
@@ -41,7 +37,7 @@ class MountManager(object):
     def mount(self, device, directory, mode='r', timeout=5):
 
         mountargs = [ str(mode) ]
-        currentItems = [x for x in self.mounts.iteritems() if x[1]['dev'] == device]
+        currentItems = [x for x in self.mounts.items() if x[1]['dev'] == device]
         if currentItems:
             currentDirectory, current = currentItems[0]
             if current['mode'] == mode:
@@ -71,7 +67,7 @@ class MountManager(object):
 
             self.logger.debug("+ %s" % cmd)
             subprocess.check_call(cmd, shell=True)
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             self.logger.error("Mount failed: '%s'" % e.output)
             return False
 
@@ -96,12 +92,12 @@ class MountManager(object):
             return False
 
         try:
-            out = subprocess.check_output("umount %s" % directory, shell=True)
+            out = subprocess.check_output("umount %s" % directory, shell=True).decode("utf8")
             self.logger.debug("%s @ %s has been unmounted." % (device, directory))
             self.read_proc_mounts()
             return True
 
-        except subprocess.CalledProcessError,e:
+        except subprocess.CalledProcessError as e:
             self.logger.error("Could not unmount %s @ %s: %s" % (device, directory, e.output))
 
 
@@ -155,14 +151,14 @@ class OnlMountManager(object):
             lbl = v.get('label', k)
             useUbiDev = False
             try:
-                v['device'] = subprocess.check_output(('blkid', '-L', lbl,)).strip()
+                v['device'] = subprocess.check_output(('blkid', '-L', lbl,)).decode("utf8").strip()
             except subprocess.CalledProcessError:
                 useUbiDev = True
             if useUbiDev == True:
                 if k == 'EFI-BOOT':
                     return False
                 try:
-                    output  = subprocess.check_output("ubinfo -d 0 -N %s" % k, shell=True).splitlines()
+                    output  = subprocess.check_output("ubinfo -d 0 -N %s" % k, shell=True).decode("utf8").splitlines()
                 except subprocess.CalledProcessError:
                     return False
 
@@ -227,10 +223,10 @@ class OnlMountManager(object):
         cmd = "fsck.ext4 -p %s" % (device)
         self.logger.debug(cmd)
         try:
-            out = subprocess.check_output(cmd, shell=True)
+            out = subprocess.check_output(cmd, shell=True).decode("utf8")
             self.logger.info("%s [ %s ] is clean." % (device, label))
             return True
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             self.logger.error("fsck failed: %s" % e.output)
             return False
 
@@ -443,7 +439,7 @@ class OnlMountContextReadWrite(OnlMountContext):
 class OnlOnieBootContext(MountContext):
     def __init__(self, mdir="/mnt/onie-boot", mode="rw", label="ONIE-BOOT", logger=None):
         try:
-            device = subprocess.check_output("blkid -L %s" % label, shell=True).strip()
+            device = subprocess.check_output("blkid -L %s" % label, shell=True).decode("utf8").strip()
         except subprocess.CalledProcessError:
             self.logger.debug("Block label %s does not yet exist..." % label)
             raise

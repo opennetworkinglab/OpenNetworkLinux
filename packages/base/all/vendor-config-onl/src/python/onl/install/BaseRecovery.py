@@ -4,13 +4,12 @@ Base classes for recovery.
 """
 
 import subprocess, os, stat
-import tempfile
 import binascii
 import glob
 import logging
-from InstallUtils import TempdirContext, MountContext, SubprocessMixin, ProcMountsParser
-from InstallUtils import InitrdContext, BlkidParser
-from ConfUtils import ChrootGrubEnv
+from onl.install.InstallUtils import TempdirContext, MountContext, SubprocessMixin, ProcMountsParser
+from onl.install.InstallUtils import InitrdContext, BlkidParser
+from onl.install.ConfUtils import ChrootGrubEnv
 
 class Base(SubprocessMixin):
 
@@ -67,7 +66,7 @@ class Base(SubprocessMixin):
                 try:
                     self.check_call(('umount', m.device,),
                                     vmode=self.V1)
-                except CalledProcessError, what:
+                except subprocess.CalledProcessError as what:
                     self.log.warn("cannot umount %s: %s",
                                   m.device, str(what))
         return 0
@@ -86,7 +85,7 @@ class GrubRecovery(Base):
             self.umountAny(label=l)
         def _l(l):
             try:
-                return self.check_output(('blkid', '-L', l,)).strip()
+                return self.check_output(('blkid', '-L', l,)).decode("utf8").strip()
             except subprocess.CalledProcessError:
                 return None
         def _r(l):

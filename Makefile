@@ -27,6 +27,7 @@ $(foreach a,$(ALL_ARCHES),$(eval $(call build_arch_template,$(a))))
 BUILD_ARCHES_wheezy := amd64 powerpc
 BUILD_ARCHES_jessie := amd64
 BUILD_ARCHES_stretch := amd64
+BUILD_ARCHES_buster := amd64
 
 # Build available architectures by default.
 .DEFAULT_GOAL := all
@@ -46,18 +47,18 @@ endif
 .PHONY: docker
 
 ifndef VERSION
-VERSION := 9
+VERSION := 10
 endif
 
 docker_check:
 	@which docker > /dev/null || (echo "*** Docker appears to be missing. Please install docker.io in order to build OpenNetworkLinux." && exit 1)
 
 docker: docker_check
-	@docker/tools/onlbuilder -$(VERSION) --isolate --hostname onlbuilder$(VERSION) --pull --autobuild --non-interactive
+	@docker/tools/onlbuilder -$(VERSION) --isolate --hostname onlbuilder$(VERSION) --autobuild --non-interactive
 
 # create an interative docker shell, for debugging builds
 docker-debug: docker_check
-	@docker/tools/onlbuilder -$(VERSION) --isolate --hostname onlbuilder$(VERSION) --pull
+	@docker/tools/onlbuilder -$(VERSION) --isolate --hostname onlbuilder$(VERSION)
 
 
 versions:

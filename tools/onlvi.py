@@ -17,7 +17,7 @@ class OnlVersionImplementation(object):
             # The current branch is used as the release version.
             self.release = False
             cmd = ('git', 'rev-parse', '--abbrev-ref', 'HEAD')
-            branch = subprocess.check_output(cmd).strip()
+            branch = subprocess.check_output(cmd).decode("utf8").strip()
             self.PRODUCTS[0]['version'] = branch
 
     def V_OS_NAME(self, data):

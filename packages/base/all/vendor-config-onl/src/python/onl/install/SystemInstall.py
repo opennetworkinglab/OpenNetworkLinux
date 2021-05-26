@@ -16,14 +16,10 @@ import glob
 
 from onl.install.InstallUtils import InitrdContext
 from onl.install.InstallUtils import ProcMountsParser
-from onl.install.ConfUtils import MachineConf, InstallerConf
+from onl.install.ConfUtils import InstallerConf
 from onl.install.ShellApp import OnieBootContext, Upgrader
 from onl.install.InstallUtils import SubprocessMixin
-import onl.install.App
-
 from onl.sysconfig import sysconfig
-
-from onl.mounts import OnlMountContextReadWrite
 
 class UpgradeHelper(Upgrader):
 
@@ -168,7 +164,7 @@ class App(SubprocessMixin):
                 cmd = ('chroot', ctx.dir, "/usr/bin/onl-install", "--force",)
             try:
                 self.check_call(cmd)
-            except subprocess.CalledProcessError, what:
+            except subprocess.CalledProcessError as what:
                 pass
 
     def run(self):

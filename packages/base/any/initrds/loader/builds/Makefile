@@ -36,7 +36,7 @@ __vendor_config_data:
 	set -e ;\
 	vpkgs= ;\
 	l="$(PLATFORMS)"; for p in $$l; do \
-	  vpkg=$$(python $(ONL)/tools/onlplatform.py $$p $(ARCH) vendor) ;\
+	  vpkg=$$(python3 $(ONL)/tools/onlplatform.py $$p $(ARCH) vendor) ;\
 	  case " $$vpkgs " in *" $$vpkg "*) continue ;; esac ;\
 	  vpkgs=$$vpkgs$${vpkgs:+" "}$$vpkg ;\
 	  echo "Adding vendor package $$vpkg" ;\

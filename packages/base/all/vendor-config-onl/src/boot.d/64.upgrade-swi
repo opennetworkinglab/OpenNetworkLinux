@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """63.upgrade-swi
 
@@ -10,7 +10,6 @@ to upgrade the SWI, only a means to detect if a SWI upgrade is indicated.
 """
 
 import os
-import re
 from onl.upgrade import ubase
 from onl.sysconfig import sysconfig
 

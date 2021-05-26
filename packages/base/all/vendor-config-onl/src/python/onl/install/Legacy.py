@@ -6,7 +6,7 @@ https://github.com/lentinj/u-boot/blob/master/include/image.h
 
 """
 
-import os, sys
+import sys
 import logging
 import struct
 import argparse
@@ -96,22 +96,22 @@ class Parser:
     def registerConstants(cls):
 
         cls.IH_OS = [None] * cls._IH_OS_END
-        for k, v in cls.__dict__.iteritems():
+        for k, v in cls.__dict__.items():
             if k.startswith('IH_OS_'):
                 cls.IH_OS[v] = k[6:]
 
         cls.IH_ARCH = [None] * cls._IH_ARCH_END
-        for k, v in cls.__dict__.iteritems():
+        for k, v in cls.__dict__.items():
             if k.startswith('IH_ARCH_'):
                 cls.IH_ARCH[v] = k[8:]
 
         cls.IH_TYPE = [None] * cls._IH_TYPE_END
-        for k, v in cls.__dict__.iteritems():
+        for k, v in cls.__dict__.items():
             if k.startswith('IH_TYPE_'):
                 cls.IH_TYPE[v] = k[8:]
 
         cls.IH_COMP = [None] * cls._IH_COMP_END
-        for k, v in cls.__dict__.iteritems():
+        for k, v in cls.__dict__.items():
             if k.startswith('IH_COMP_'):
                 cls.IH_COMP[v] = k[8:]
 
@@ -271,7 +271,7 @@ class ExtractRunner:
 
         strm = self.outStream or sys.stdout
         strm.write(buf)
-        
+
         return 0
 
     def shutdown(self):
@@ -329,7 +329,7 @@ class App:
 
         try:
             args = ap.parse_args()
-        except SystemExit, what:
+        except SystemExit as what:
             return what.code
 
         if args.quiet:

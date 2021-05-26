@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 ############################################################
 import os
 import sys
@@ -37,7 +37,7 @@ class OnlBootConfig(object):
         self.keys.pop(k, None)
 
     def _writeh(self, handle):
-        for (k, v) in self.keys.iteritems():
+        for (k, v) in self.keys.items():
             handle.write("%s=%s\n" % (k, v))
 
     def _writef(self, f):
@@ -82,16 +82,16 @@ class OnlBootConfig(object):
     def argparse_write(self, ops):
         try:
             if ops.dry:
-                print self.keys
+                print(self.keys)
                 self.validate()
             else:
                 self.write(ops.write)
                 if not ops.write and self.keys != self._original:
-                    print "You must reboot the switch before these changes will take affect."
+                    print("You must reboot the switch before these changes will take affect.")
 
-        except Exception, e:
-            print e
-            print "The boot configuration has not been changed."
+        except Exception as e:
+            print(e)
+            print("The boot configuration has not been changed.")
 
 
     def main(self, name):

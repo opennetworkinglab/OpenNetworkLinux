@@ -13,11 +13,10 @@ import shutil
 import json
 import string
 import argparse
-import yaml
 from time import sleep
 
 from onl.platform.current import OnlPlatform, OnlPlatformName
-from onl.mounts import OnlMountManager, OnlMountContextReadOnly, OnlMountContextReadWrite
+from onl.mounts import OnlMountContextReadWrite
 
 class BaseUpgrade(object):
 
@@ -109,14 +108,14 @@ class BaseUpgrade(object):
         if os.path.exists(FW_PRINTENV):
             try:
                 if var:
-                    return subprocess.check_output("%s -n %s" % FW_PRINTENV, stderr=subprocess.STDOUT);
+                    return subprocess.check_output("%s -n %s" % FW_PRINTENV, stderr=subprocess.STDOUT).decode("utf8")
                 else:
                     variables = {}
-                    for v in subprocess.check_output("/usr/bin/fw_printenv", shell=True).split('\n'):
+                    for v in subprocess.check_output("/usr/bin/fw_printenv", shell=True).decode("utf8").split('\n'):
                         (name, eq, value) = v.partition('=')
                         variables[name] = value
                     return variables
-            except Exception, e:
+            except Exception as e:
                 return None
         else:
             return None
@@ -133,7 +132,7 @@ class BaseUpgrade(object):
 
         try:
             shutil.copyfile(src, dst)
-        except Exception, e:
+        except Exception as e:
             self.abort("Exception while copying: %s" % e)
 
     def reboot(self):
@@ -245,7 +244,7 @@ class BaseUpgrade(object):
     def upgrade_prompt(self, instructions, default='yes'):
         try:
             return self.__upgrade_prompt(instructions, default)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("")
             self.logger.error("Exception: %s" % e)
             self.abort("No upgrade will be performed.")

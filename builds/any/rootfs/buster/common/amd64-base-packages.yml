@@ -1,0 +1,17 @@
+############################################################
+#
+# Common packages for all amd64 systems.
+#
+############################################################
+- dmidecode
+- parted
+- smartmontools
+- grub2
+- onl-upgrade
+- onl-kernel-4.14-lts-x86-64-all-modules
+- efibootmgr
+- gdisk
+- acpid
+- docker-ce
+- docker-ce-cli
+- containerd

@@ -6,7 +6,7 @@
 
 PYTHON_PYROUTE2_VERSION			= 0.3.14
 PYTHON_PYROUTE2_SOURCE			= pyroute2-$(PYTHON_PYROUTE2_VERSION).tar.gz
-PYTHON_PYROUTE2_SITE			= https://pypi.python.org/packages/source/p/pyroute2/
+PYTHON_PYROUTE2_SITE			= https://pypi.python.org/packages/source/p/pyroute2
 PYTHON_PYROUTE2_LICENSE			= GPLv2+ and Apache v2
 PYTHON_PYROUTE2_LICENSE_FILES		= \
   READEME.licence.md \

@@ -1,11 +1,10 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 import argparse
 import sys
 import os
 import zipfile
 import json
-import apt_inst
 import onlu
 
 logger = onlu.init_logging('switool')
@@ -19,7 +18,7 @@ class OnlSwitchImage(object):
         self.manifest = None
 
     def add(self, fname, arcname=None, compressed=True):
-        self.zipfile.write(fname, arcname=arcname, compress_type = zipfile.ZIP_DEFLATED if compressed else zipefile.ZIP_STORED)
+        self.zipfile.write(fname, arcname=arcname, compress_type = zipfile.ZIP_DEFLATED if compressed else zipfile.ZIP_STORED)
 
     def add_rootfs(self, rootfs_sqsh):
         self.add(rootfs_sqsh)
@@ -91,7 +90,7 @@ if swi is None:
     swi = OnlSwitchImage(ops.swi, 'r')
 
 if ops.contents:
-    print " ".join(swi.get_contents())
+    print(" ".join(swi.get_contents()))
 
 if ops.platforms:
-    print " ".join(swi.get_platforms())
+    print(" ".join(swi.get_platforms()))

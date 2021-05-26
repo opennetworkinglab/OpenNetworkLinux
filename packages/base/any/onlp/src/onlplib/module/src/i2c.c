@@ -35,6 +35,7 @@
 #else
 #include <linux/i2c-dev.h>
 #endif
+#include <i2c/smbus.h>
 
 #include <sys/types.h>
 #include <sys/ioctl.h>

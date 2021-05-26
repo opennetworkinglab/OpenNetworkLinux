@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 import os
 import sys
@@ -23,7 +23,7 @@ class OnlVersionsGenerator(object):
         self.ops = ops
 
         cmd = ('git', 'rev-list', 'HEAD', '-1',)
-        self.build_sha1 = subprocess.check_output(cmd).strip()
+        self.build_sha1 = subprocess.check_output(cmd).decode("utf8").strip()
 
         fmt = "%Y-%m-%d.%H:%M"
         self.build_timestamp = time.strftime(fmt, time.localtime())
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     ap.add_argument("--output-dir", required=True, help="Location for generated files.")
     ap.add_argument("--force", action='store_true', help="Force regeneration.")
     ap.add_argument("--export", action='store_true', help="Include export keyword in .sh and .mk versions.")
-    ap.add_argument("--print", action='store_true', help="Print version data.", dest='print_')
+    ap.add_argument("--print", action='store_true', help="print(version data.", dest='print_')
     ops = ap.parse_args()
 
     o = OnlVersionsGenerator(ops)

@@ -29,7 +29,7 @@ class OnlLoaderVersion(OnlVersionBase):
 #
 # import onl.versions
 #
-# print onl.versions.rootfs.BUILD_TIMESTAMP
+# print(onl.versions.rootfs.BUILD_TIMESTAMP)
 #
 rootfs = OnlRootfsVersion() if os.path.exists(OnlRootfsVersion.MANIFEST) else None
 loader = OnlLoaderVersion() if os.path.exists(OnlLoaderVersion.MANIFEST) else None

@@ -1,16 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 ############################################################
 #
 # ONL Loader Upgrade
 #
 ############################################################
 import os
-import sys
 import fnmatch
 
 from onl.upgrade import ubase
 from onl.sysconfig import sysconfig
-from onl.mounts import OnlMountManager, OnlMountContextReadOnly, OnlMountContextReadWrite
+from onl.mounts import OnlMountContextReadWrite
 from onl.install import BaseInstall, ConfUtils, InstallUtils
 from onl.install.ShellApp import OnieBootContext, OnieSysinfo
 import onl.platform.current

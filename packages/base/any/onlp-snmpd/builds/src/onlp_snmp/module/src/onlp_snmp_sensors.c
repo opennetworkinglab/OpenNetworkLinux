@@ -297,7 +297,8 @@ temp_devname_handler__(netsnmp_request_info *req,
                        uint32_t index,
                        onlp_snmp_sensor_t *ss)
 {
-    char device_name[ONLP_SNMP_CONFIG_MAX_NAME_LENGTH+ONLP_SNMP_CONFIG_MAX_DESC_LENGTH];
+    // Add 8 in the end to avoid format-truncation warning
+    char device_name[ONLP_SNMP_CONFIG_MAX_NAME_LENGTH+ONLP_SNMP_CONFIG_MAX_DESC_LENGTH+8];
 
     snprintf(device_name,  sizeof(device_name),
              "%s %s%s", "Thermal", ss->name, ss->desc);
@@ -401,7 +402,8 @@ fan_devname_handler__(netsnmp_request_info *req,
                       uint32_t index,
                       onlp_snmp_sensor_t *ss)
 {
-    char device_name[ONLP_SNMP_CONFIG_MAX_NAME_LENGTH+ONLP_SNMP_CONFIG_MAX_DESC_LENGTH];
+    // Add 4 in the end to avoid format-truncation warning
+    char device_name[ONLP_SNMP_CONFIG_MAX_NAME_LENGTH+ONLP_SNMP_CONFIG_MAX_DESC_LENGTH+4];
     snprintf(device_name,  sizeof(device_name),
              "%s %s%s", "Fan", ss->name, ss->desc);
 
@@ -601,7 +603,8 @@ psu_devname_handler__(netsnmp_request_info *req,
                       uint32_t index,
                       onlp_snmp_sensor_t *ss)
 {
-    char device_name[ONLP_SNMP_CONFIG_MAX_NAME_LENGTH+ONLP_SNMP_CONFIG_MAX_DESC_LENGTH];
+    // Add 4 in the end to avoid format-truncation warning
+    char device_name[ONLP_SNMP_CONFIG_MAX_NAME_LENGTH+ONLP_SNMP_CONFIG_MAX_DESC_LENGTH+4];
     snprintf(device_name,  sizeof(device_name),
              "%s %s%s", "PSU", ss->name, ss->desc);
 

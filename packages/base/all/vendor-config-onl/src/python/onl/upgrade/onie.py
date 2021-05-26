@@ -1,7 +1,6 @@
-#!/usr/bin/python -u
+#!/usr/bin/python3 -u
 
 import os
-import sys
 
 from onl.upgrade import ubase
 from onl.sysconfig import sysconfig

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 ############################################################
 # <bsn.cl fy=2013 v=none>
 #
@@ -39,7 +39,7 @@ def platform_name_get():
     # running ONIE
     if platform is None and os.path.exists("/bin/onie-sysinfo"):
         try:
-            platform = subprocess.check_output(('/bin/onie-sysinfo', '-p',)).strip()
+            platform = subprocess.check_output(('/bin/onie-sysinfo', '-p',)).decode("utf8").strip()
         except subprocess.CalledProcessError as what:
             for line in (what.output or "").splitlines():
                 sys.stderr.write(">>> %s\n" % line)
@@ -49,7 +49,7 @@ def platform_name_get():
     # running ONL loader, with access to ONIE
     if platform is None and os.path.exists("/usr/bin/onie-shell"):
         try:
-            platform = subprocess.check_output(('/usr/bin/onie-shell', '-c', "onie-sysinfo -p",)).strip()
+            platform = subprocess.check_output(('/usr/bin/onie-shell', '-c', "onie-sysinfo -p",)).decode("utf8").strip()
         except subprocess.CalledProcessError as what:
             for line in (what.output or "").splitlines():
                 sys.stderr.write(">>> %s\n" % line)
@@ -59,7 +59,7 @@ def platform_name_get():
     # legacy ONIE environment (including parsable shell in machine.conf)
     if platform is None and os.path.exists("/etc/machine.conf"):
         cmd = "IFS=; . /tmp/machine.conf; set | egrep ^onie_platform="
-        buf = subprocess.check_output(cmd)
+        buf = subprocess.check_output(cmd).decode("utf8")
         if buf:
             platform = buf.partition('=')[2].strip()
             if platform.startswith('"') or platform.startswith("'"):

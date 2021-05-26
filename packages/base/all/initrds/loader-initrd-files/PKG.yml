@@ -16,7 +16,7 @@ packages:
       - src/etc : /etc
       - src/lib : /lib
       - src/bootmodes : /bootmodes
-      - src/python: /usr/lib/python2.7/site-packages
+      - src/python: ${PY_INSTALL}
       - $ONL/make/versions/version-onl.sh :   /etc/onl/loader/versions.sh
       - $ONL/make/versions/version-onl.json : /etc/onl/loader/versions.json
       - $ONL/make/versions/version-onl.mk :   /etc/onl/loader/versions.mk

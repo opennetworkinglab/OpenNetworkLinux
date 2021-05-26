@@ -174,6 +174,7 @@ onlp_platform_manager_daemon(const char* name,
     aim_daemonize(&config, &rconfig);
     aim_log_handler_basic_init_all(name,
                                    logfile,
+                                   logfile,
                                    1024*1024,
                                    99);
     if(pidfile) {

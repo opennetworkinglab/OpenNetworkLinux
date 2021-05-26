@@ -4,9 +4,9 @@
 ##
 ######################################################################
 
-PYTHON_PYPARTED_VERSION			= 3.10.7
-PYTHON_PYPARTED_SOURCE			= pyparted-$(PYTHON_PYPARTED_VERSION).tar.bz2
-##PYTHON_PYPARTED_SITE			= http://pyyaml.org/download/pyyaml/
+PYTHON_PYPARTED_VERSION			= v3.10.7
+PYTHON_PYPARTED_SOURCE			= pyparted-$(PYTHON_PYPARTED_VERSION).tar.gz
+PYTHON_PYPARTED_SITE			= http://sources.buildroot.net
 PYTHON_PYPARTED_INSTALL_STAGING		= NO
 PYTHON_PYPARTED_INSTALL_TARGET		= YES
 PYTHON_PYPARTED_LICENSE			= GPL

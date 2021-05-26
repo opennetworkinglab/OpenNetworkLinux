@@ -6,7 +6,7 @@ Application-level code for Switch Light recovery.
 import os, sys
 import imp
 import logging
-from ConfUtils import UbootEnv
+from onl.install.ConfUtils import UbootEnv
 
 class App:
 
